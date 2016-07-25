@@ -175,6 +175,7 @@ PRIVATE void announce(void)
   kprintf("\nMINIX %s.%s. "
   "Copyright 2006, Vrije Universiteit, Amsterdam, The Netherlands\n",
       OS_RELEASE, OS_VERSION);
+  kprintf("Stuart is an asshole and also claims credit for this\n");
 #if (CHIP == INTEL)
   /* Real mode, or 16/32-bit protected mode? */
   kprintf("Executing in %s mode.\n\n",

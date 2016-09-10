@@ -14,7 +14,7 @@
 
 struct channel *channels = NULL;
 
-int do_subserv() {
+PUBLIC int do_subserv() {
   /* TODO: check message status code, act accordingly */
   printf("Message reached server\n");
 }

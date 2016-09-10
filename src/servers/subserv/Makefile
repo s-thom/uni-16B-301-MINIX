@@ -1,5 +1,5 @@
-# Makefile for Process Manager (PM)
-SERVER = pm
+# Makefile for Subscription
+SERVER = subserv
 
 # directories
 u = /usr
@@ -13,8 +13,7 @@ CC =	exec cc
 CFLAGS = -I$i
 LDFLAGS = -i
 
-OBJ = 	main.o forkexit.o break.o exec.o time.o timers.o \
-	signal.o alloc.o utility.o table.o trace.o getset.o misc.o
+OBJ = 	main.o
 
 # build local binary
 all build:	$(SERVER)

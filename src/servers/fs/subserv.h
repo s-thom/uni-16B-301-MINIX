@@ -3,15 +3,15 @@
  
  /* Holds information about a channel */
  struct channel {
-  char[15],
-  char owner,
+  char cname[15];
+  char cowner;
   
-  long subscribed,
-  long unrecieved,
-  long waiting,
+  long subscribed;
+  long unrecieved;
+  long waiting;
   
-  void *content,
-  int content_size,
+  void *content;
+  int content_size;
   
-  struct channel *next
- }
+  struct channel *next;
+ };

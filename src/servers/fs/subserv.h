@@ -3,11 +3,11 @@
  
  /* Holds information about a channel */
  struct channel {
-  char cname[15];
-  char cowner;
+  char name[15];
+  char oid;
   
   long subscribed;
-  long unrecieved;
+  long unreceived;
   long waiting;
   
   void *content;

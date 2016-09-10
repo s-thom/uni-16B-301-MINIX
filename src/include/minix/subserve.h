@@ -1,4 +1,5 @@
 #include <lib.h>
+#include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -30,10 +31,11 @@ int create_channel(char name[]){
 	int op;
 
 	message *m = (message*) malloc(sizeof(message));
+	m->m_type = SUBNUMBER;
 	m->m3_i1 = CREATECHANNEL;
 	strcpy(m->m3_ca1, name);
 
-	_sendrec(SUBNUMBER, m);
+	_sendrec(FS, m);
 	op = m->m3_i1;
 	free(m);
 
@@ -49,10 +51,11 @@ int close_channel(char name[]){
 	int op;	
 		
 	message *m = (message*) malloc(sizeof(message));
+	m->m_type = SUBNUMBER;
 	m->m3_i1 = CLOSECHANNEL;
 	strcpy(m->m3_ca1, name);
 
-	_sendrec(SUBNUMBER, m);
+	_sendrec(FS, m);
 	
 	op = m->m3_i1;
 	free(m);
@@ -66,12 +69,13 @@ int push(char name[], void* data, size_t size){
 	int op;
 
 	message *m = (message*) malloc(sizeof(message));
+	m->m_type = SUBNUMBER;
 	m->m3_i1 = PUSHC;
 	strcpy(m->m3_ca1, name);
 	m->m3_p1 = (char*) data;
 	m->m3_i2 = size;
 
-	_sendrec(SUBNUMBER, m);
+	_sendrec(FS, m);
 	
 	op = m->m3_i1;
 	free(m);
@@ -86,12 +90,13 @@ int pull(char name[], void*data, size_t size){
 	int op;
 
 	message *m = (message*) malloc(sizeof(message));
+	m->m_type = SUBNUMBER;
 	m->m3_i1 = PULLC;
 	strcpy(m->m3_ca1, name);
 	m->m3_p1 = (char*) data;
 	m->m3_i2 = size;
 		
-	_sendrec(SUBNUMBER, m);
+	_sendrec(FS, m);
 	
 	op = m->m3_i1;
 	free(m);
@@ -106,10 +111,11 @@ int subscribe(char name[]){
 	int op;
 
 	message *m = (message*) malloc(sizeof(message));
+	m->m_type = SUBNUMBER;
 	m->m3_i1 = SUBC;
 	strcpy(m->m3_ca1, name);
 
-	_sendrec(SUBNUMBER, m);
+	_sendrec(FS, m);
 	op = m->m3_i1;
 	free(m);
 
@@ -121,10 +127,11 @@ int unsubscribe(char name[]){
 	int op;
 
 	message *m = (message*) malloc(sizeof(message));
+	m->m_type = SUBNUMBER;
 	m->m3_i1 = UNSUBC;
 	strcpy(m->m3_ca1, name);
 
-	_sendrec(SUBNUMBER, m);
+	_sendrec(FS, m);
 	op = m->m3_i1;
 	free(m);
 

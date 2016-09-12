@@ -55,6 +55,53 @@ struct channel* find_channel(char *name) {
   return curr;
 }
 
+/**
+ * Handles the creation of a channel
+ */
+int handle_create() {
+  /* TODO: Check for erroneous message */
+  /* TODO: Write function */
+}
+
+/**
+ * Handles the closing of a channel
+ */
+int handle_close() {
+  /* TODO: Check for erroneous message */
+  /* TODO: Write function */
+}
+
+/**
+ * Handles pushing to a channel
+ */
+int handle_push() {
+  /* TODO: Check for erroneous message */
+  /* TODO: Write function */
+}
+
+/**
+ * Handles pulling from a channel
+ */
+int handle_pull() {
+  /* TODO: Check for erroneous message */
+  /* TODO: Write function */
+}
+
+/**
+ * Handles subscribing to a channel
+ */
+int handle_subscribe() {
+  /* TODO: Check for erroneous message */
+  /* TODO: Write function */
+}
+
+/**
+ * Handles unsubscription from a channel
+ */
+int handle_unsubscribe() {
+  /* TODO: Check for erroneous message */
+  /* TODO: Write function */
+}
 
 
 

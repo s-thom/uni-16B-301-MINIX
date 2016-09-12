@@ -28,6 +28,7 @@ struct channel* create_channel(char *name, char oid) {
     nc->name[i] = 0;
   }
   strncpy(nc->name, name, 14);
+  nc->name[14] = 0;
   
   nc->oid = oid;
   nc->subscribed = 0;
@@ -53,3 +54,9 @@ struct channel* find_channel(char *name) {
   
   return curr;
 }
+
+
+
+
+
+

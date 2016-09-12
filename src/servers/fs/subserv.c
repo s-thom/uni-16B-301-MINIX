@@ -149,7 +149,32 @@ int handle_unsubscribe() {
   /* TODO: Write function */
 }
 
+/* uses the index to find the bit you want to change, sets the bit to the bool value 0 or 1 and then returns */
+long set_map(int index, int boolean, long current_map){
+  
+  long mask;  
+  
+  mask = 0x01;
+  mask = mask << index;
+  
+  if(boolean){
+    return current_map | mask;
+  }
+  else{
+    mask = ~ mask;
+    return current_map & mask;
+  }
+}
 
+int get_map(int index, long current_map){
+  long mask;
 
-
+  mask = 0x01;
+  mask = mask << index - 1;
+  mask = ~ mask;
+  current_map = current_map & mask;
+  current_map = current_map >> index;
+  return (int) current_map;
+  
+}
 

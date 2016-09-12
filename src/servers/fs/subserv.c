@@ -17,6 +17,19 @@ struct channel *channels = NULL;
 PUBLIC int do_subserv() {
   /* TODO: check message status code, act accordingly */
   int retcode;
+  char index;
+  char terminated = 0;
+  
+  /* Zero the rest of the name as soon as a \0 is found */
+  for (index = 0; index < 15; index++) {
+    if (terminated) {
+      m_in.m3_ca1[index] = 0;
+    } else {
+      if (m_in.m3_ca1[index] == 0) {
+        terminated = 1;
+      }
+    }
+  }
   
   switch(m_in.m3_i1) {
     /* CREATE */

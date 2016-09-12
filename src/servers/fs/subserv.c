@@ -16,7 +16,34 @@ struct channel *channels = NULL;
 
 PUBLIC int do_subserv() {
   /* TODO: check message status code, act accordingly */
-  printf("Message reached server\n");
+  int retcode;
+  
+  switch(m_in.m3_i1) {
+    /* CREATE */
+    case 0:
+      retcode = handle_create();
+      break;
+    /* CLOSE */
+    case 1:
+      retcode = handle_close();
+      break;
+    /* PUSH */
+    case 2:
+      retcode = handle_push();
+      break;
+    /* PULL */
+    case 3:
+      retcode = handle_pull();
+      break;
+    /* SUBSCRIBE */
+    case 4:
+      retcode = handle_subscribe();
+      break;
+    /* UNSUBSCRIBE */
+    case 5:
+      retcode = handle_unsubscribe();
+      break;
+  }
 }
 
 struct channel* create_channel(char *name, char oid) {
@@ -59,6 +86,7 @@ struct channel* find_channel(char *name) {
  * Handles the creation of a channel
  */
 int handle_create() {
+  printf("[subserv] got CREATE\n");
   /* TODO: Check for erroneous message */
   /* TODO: Write function */
 }
@@ -67,6 +95,7 @@ int handle_create() {
  * Handles the closing of a channel
  */
 int handle_close() {
+  printf("[subserv] got CLOSE\n");
   /* TODO: Check for erroneous message */
   /* TODO: Write function */
 }
@@ -75,6 +104,7 @@ int handle_close() {
  * Handles pushing to a channel
  */
 int handle_push() {
+  printf("[subserv] got PUSH\n");
   /* TODO: Check for erroneous message */
   /* TODO: Write function */
 }
@@ -83,6 +113,7 @@ int handle_push() {
  * Handles pulling from a channel
  */
 int handle_pull() {
+  printf("[subserv] got PULL\n");
   /* TODO: Check for erroneous message */
   /* TODO: Write function */
 }
@@ -91,6 +122,7 @@ int handle_pull() {
  * Handles subscribing to a channel
  */
 int handle_subscribe() {
+  printf("[subserv] got SUBSCRIBE\n");
   /* TODO: Check for erroneous message */
   /* TODO: Write function */
 }
@@ -99,6 +131,7 @@ int handle_subscribe() {
  * Handles unsubscription from a channel
  */
 int handle_unsubscribe() {
+  printf("[subserv] got UNSUBSCRIBE\n");
   /* TODO: Check for erroneous message */
   /* TODO: Write function */
 }

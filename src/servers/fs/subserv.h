@@ -8,11 +8,11 @@ struct channel {
   
   long subscribed;
   long unreceived;
-  long waiting;
+  
+  int content_size;
+  int min_buffer;
   
   void *content;
-  int content_size;
-  
   struct channel *next;
 };
 

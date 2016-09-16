@@ -121,7 +121,6 @@ int handle_push() {
    * Check pusher owns channel
    * Free previous stored data
    * Copy data to this
-   * Go through things that are waiting, and push if waiting
    */
   struct channel chan;
   char ind;
@@ -147,15 +146,14 @@ int handle_push() {
   if (chan->content != NULL) {
     free(chan->content);
   }
-  chan->content_size = m_in.m3_i2;
+  
+  if (m_in.m3_i2 > chan->min_buffer) {
+    chan->content_size = chan->min_buffer;
+  } else {
+    chan->content_size = m_in.m3_i2;
+  }
   chan->content = malloc(chan->content_size);
   sys_vircopy(m_in.m_source, D, m_in.m3_p1, SELF, D, chan->content, chan->content_size);
-  
-  for (ind = 0; ind < 64; i++) {
-    if (get_map(ind, chan->waiting)) {
-      /* TODO: Send thing to process */
-    }
-  }
 }
 
 /**

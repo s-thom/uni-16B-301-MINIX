@@ -1,6 +1,10 @@
 /* Hold the types and struct definitions used by the subscription server
  */
- 
+
+#ifndef SUBSERV
+#define SUBSERV
+
+typedef struct channel CHANNEL;
 /* Holds information about a channel */
 struct channel {
   char name[15];
@@ -29,3 +33,6 @@ int handle_subscribe();
 int handle_unsubscribe();
 long set_map(int index, int boolean, long current_map);
 int get_map(int index, long current_map);
+
+#endif
+

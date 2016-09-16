@@ -117,9 +117,45 @@ int handle_close() {
  * Handles pushing to a channel
  */
 int handle_push() {
+  /* Push overview 
+   * Check pusher owns channel
+   * Free previous stored data
+   * Copy data to this
+   * Go through things that are waiting, and push if waiting
+   */
+  struct channel chan;
+  char ind;
+  
+  
   printf("[subserv] got PUSH\n");
-  /* TODO: Check for erroneous message */
-  /* TODO: Write function */
+  
+  chan = find_channel(m_in.m3_ca1);
+  
+  /* Error checking */
+  /* Check channel actually exists */
+  if (chan == NULL) {
+    /* TODO: Set errno */
+    return 1;
+  }
+  /* Check owner of channel */
+  if (m_in.m_source != chan->oid) {
+    /* TODO: Set errno */
+    return 1;
+  }
+  
+  /* Free previous content, copy new content */
+  if (chan->content != NULL) {
+    free(chan->content);
+  }
+  chan->content_size = m_in.m3_i2;
+  chan->content = malloc(chan->content_size);
+  sys_vircopy(m_in.m_source, D, m_in.m3_p1, SELF, D, chan->content, chan->content_size);
+  
+  for (ind = 0; ind < 64; i++) {
+    if (get_map(ind, chan->waiting)) {
+      /* TODO: Send thing to process */
+    }
+  }
 }
 
 /**

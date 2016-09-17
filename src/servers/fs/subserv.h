@@ -23,8 +23,6 @@ struct channel {
 /* Function prototypes */
 
 int do_subserv();
-struct channel* create_channel(char *name, char oid);
-struct channel* find_channel(char *name);
 int handle_create();
 int handle_close();
 int handle_push();

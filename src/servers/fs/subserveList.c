@@ -1,10 +1,13 @@
 #include "subserv.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 /* checks if the channel is already in the list and if it is return 1 */
-int contains_item(char name[], CHANNEL *root){
+int contains_channel(char name[], CHANNEL *root){
   
   while(root != NULL){
-    if(strncmp(name, root->name, 14)){
+    if(strncmp(name, root->name, 14) == 0){
       return 1;
     }
     root = root->next;
@@ -13,12 +16,12 @@ int contains_item(char name[], CHANNEL *root){
 }
 
 /* removes string at a given index */
-CHANNEL *remove(char name[], CHANNEL *root){
+CHANNEL *remove_channel(char name[], CHANNEL *root){
   
   int current = 0;
-  CHANNEL temp = root;
-  CHANNEL prev = NULL;
-  CHANNEL placeHolder = NULL;
+  CHANNEL *temp = root;
+  CHANNEL *prev = NULL;
+  CHANNEL *placeHolder = NULL;
   
   while(temp != NULL){
     if(strncmp(name, temp->name, 14) == 0){
@@ -41,25 +44,27 @@ CHANNEL *remove(char name[], CHANNEL *root){
     current++;
   }
   return NULL;
-{
+}
 
 /* adds the new node to the front of the list */
-CHANNEL *add(CHANNEL *new, CHANNEL *root){
-  return new->next = root;
+CHANNEL *add_channel(CHANNEL *new, CHANNEL *root){
+  printf("adding struct %s\n", new->name);  
+  new->next = root;
+  return new;
 }
 
 /* returns a pointer */
-CHANNEL *get(char name[], CHANNEL *root){  
+CHANNEL *get_channel(char name[], CHANNEL *root){  
   
   while(root != NULL){
-    
+    printf("comp = %s and %s\n", name, root->name);
     if(strncmp(name, root->name, 14) == 0){
       return root;
     }    
     root = root->next;
   }
   return NULL;
-{
+}
 
 struct channel* create_channel(char *name, char oid) {
   struct channel *nc = (struct channel*) malloc(sizeof(struct channel));
@@ -82,19 +87,3 @@ struct channel* create_channel(char *name, char oid) {
   
   return nc;
 }
-
-/*
-struct channel* find_channel(char *name, ) {
-  struct channel *curr = channels;
-  
-  while (curr != NULL) {
-    if (strncmp(name, curr->name, 14) == 0) {
-      break;
-    }
-    
-    curr = curr->next;
-  }
-  
-  return curr;
-}
-*/

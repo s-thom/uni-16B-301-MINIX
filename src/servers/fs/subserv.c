@@ -57,6 +57,8 @@ PUBLIC int do_subserv() {
       retcode = handle_unsubscribe();
       break;
   }
+  
+  /* TODO: Send message back */
 }
 
 struct channel* create_channel(char *name, char oid) {
@@ -99,6 +101,11 @@ struct channel* find_channel(char *name) {
  * Handles the creation of a channel
  */
 int handle_create() {
+  /* Create overview 
+   * Check channel doesn't exist
+   * Create channel struct, set values
+   * Send back
+   */
   printf("[subserv] got CREATE\n");
   /* TODO: Check for erroneous message */
   /* TODO: Write function */
@@ -108,6 +115,11 @@ int handle_create() {
  * Handles the closing of a channel
  */
 int handle_close() {
+  /* Close overview 
+   * Check channel exists, sender is owner
+   * Remove channel
+   * Send back
+   */
   printf("[subserv] got CLOSE\n");
   /* TODO: Check for erroneous message */
   /* TODO: Write function */
@@ -134,12 +146,12 @@ int handle_push() {
   /* Check channel actually exists */
   if (chan == NULL) {
     /* TODO: Set errno */
-    return 1;
+    return SS_ERROR;
   }
   /* Check owner of channel */
   if (m_in.m_source != chan->oid) {
     /* TODO: Set errno */
-    return 1;
+    return SS_ERROR;
   }
   
   /* Free previous content, copy new content */
@@ -154,21 +166,33 @@ int handle_push() {
   }
   chan->content = malloc(chan->content_size);
   sys_vircopy(m_in.m_source, D, m_in.m3_p1, SELF, D, chan->content, chan->content_size);
+  
+  return SS_SUCCESS;
 }
 
 /**
  * Handles pulling from a channel
  */
 int handle_pull() {
+  /* Pull overview 
+   * Check puller is subscribed
+   * Copy data
+   * Set message data
+   */
   printf("[subserv] got PULL\n");
   /* TODO: Check for erroneous message */
   /* TODO: Write function */
 }
 
 /**
- * Handles subscribing to a channel
+ * Handles subscribing to a channel 
  */
 int handle_subscribe() {
+  /* Subscribe overview 
+   * Check proc isn't already subscribed
+   * Add proc to subscribers
+   * Send back
+   */
   printf("[subserv] got SUBSCRIBE\n");
   /* TODO: Check for erroneous message */
   /* TODO: Write function */
@@ -178,6 +202,11 @@ int handle_subscribe() {
  * Handles unsubscription from a channel
  */
 int handle_unsubscribe() {
+  /* Unsubscribe overview 
+   * Check proc is subscribed
+   * Remove proc from subscribers
+   * Send back
+   */
   printf("[subserv] got UNSUBSCRIBE\n");
   /* TODO: Check for erroneous message */
   /* TODO: Write function */

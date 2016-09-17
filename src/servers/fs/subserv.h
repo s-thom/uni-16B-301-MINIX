@@ -1,5 +1,8 @@
 /* Hold the types and struct definitions used by the subscription server
  */
+
+#define SS_ERROR 0
+#define SS_SUCCESS 1
  
 /* Holds information about a channel */
 struct channel {

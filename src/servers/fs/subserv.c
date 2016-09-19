@@ -12,7 +12,7 @@
 #include "subserveList.c"
 #include <stdio.h>
 
-struct channel *channels = NULL;
+CHANNEL *channels = NULL;
 
 PUBLIC int do_subserv() {
   /* TODO: check message status code, act accordingly */
@@ -75,9 +75,32 @@ int handle_create() {
    * Create channel struct, set values
    * Send back
    */
+  CHANNEL *chan;
+  char ind;
+  
   printf("[subserv] got CREATE\n");
-  /* TODO: Check for erroneous message */
-  /* TODO: Write function */
+  
+  chan = get_channel(m_in.m3_ca1);
+  
+  /* Error checking */
+  /* Check channel doesn't exist
+   * All other functions make sure the channel *does* exist. Not this one
+   */
+  if (chan != NULL) {
+    /* Check owner of channel */
+    if (m_in.m_source == chan->oid) {
+      /* You own this, yay! */
+      return SS_SUCCESS;
+    }
+  
+    /* TODO: Set errno */
+    return SS_ERROR;
+  }
+  
+  chan = create_channel(&m_in.ss_name, m_in.m_source);
+  channels = add_channel(chan, channels);
+  
+  return SS_SUCCESS;
 }
 
 /**
@@ -88,10 +111,29 @@ int handle_close() {
    * Check channel exists, sender is owner
    * Remove channel
    * Send back
-   */
+   */  
+  CHANNEL *chan;
+  char ind;
+  
   printf("[subserv] got CLOSE\n");
-  /* TODO: Check for erroneous message */
-  /* TODO: Write function */
+  
+  chan = get_channel(m_in.m3_ca1);
+  
+  /* Error checking */
+  /* Check channel actually exists */
+  if (chan == NULL) {
+    /* TODO: Set errno */
+    return SS_ERROR;
+  }
+  /* Check owner of channel */
+  if (m_in.m_source != chan->oid) {
+    /* TODO: Set errno */
+    return SS_ERROR;
+  }
+  
+  channels = remove_channel(m_in.ss_name, channels);
+  
+  return SS_SUCCESS;
 }
 
 /**
@@ -103,13 +145,13 @@ int handle_push() {
    * Free previous stored data
    * Copy data to this
    */
-  struct channel *chan;
+  CHANNEL *chan;
   char ind;
   
   
   printf("[subserv] got PUSH\n");
   
-  chan = find_channel(m_in.m3_ca1);
+  chan = get_channel(m_in.m3_ca1);
   
   /* Error checking */
   /* Check channel actually exists */
@@ -150,7 +192,7 @@ int handle_pull() {
    * Copy data
    * Set message data
    */
-  struct channel *chan;
+  CHANNEL *chan;
   int copy_size;
   
   printf("[subserv] got PULL\n");

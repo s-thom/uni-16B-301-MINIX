@@ -88,9 +88,26 @@ int handle_close() {
    * Check channel exists, sender is owner
    * Remove channel
    * Send back
-   */
+   */  
+  CHANNEL *chan;
+  char ind;
+  
   printf("[subserv] got CLOSE\n");
-  /* TODO: Check for erroneous message */
+  
+  chan = find_channel(m_in.m3_ca1);
+  
+  /* Error checking */
+  /* Check channel actually exists */
+  if (chan == NULL) {
+    /* TODO: Set errno */
+    return SS_ERROR;
+  }
+  /* Check owner of channel */
+  if (m_in.m_source != chan->oid) {
+    /* TODO: Set errno */
+    return SS_ERROR;
+  }
+  
   /* TODO: Write function */
 }
 

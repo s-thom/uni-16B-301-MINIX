@@ -28,6 +28,12 @@ CHANNEL *remove_channel(char name[], CHANNEL *root){
       if(prev == NULL){
         /* its the root */
         placeHolder = temp->next;
+        
+        if(content != NULL){
+          /* frees stored date seg */          
+          free(content);
+        }
+        
         free(temp);
         return placeHolder;
       }

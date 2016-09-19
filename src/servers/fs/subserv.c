@@ -111,6 +111,28 @@ int handle_unsubscribe() {
   printf("[subserv] got UNSUBSCRIBE\n");
   /* TODO: Check for erroneous message */
   /* TODO: Write function */
+  /* m_in */
+
+  CHANNEL *temp = get_channel(m_in.ss_name, channels);
+  int sender = m_in.m_source  
+  
+  /* checks to see if that channel is in the list */
+  if(temp != NULL){
+    
+    if(get_map(sender, temp->subscribed)){
+     /* sets sub and unrec to 0 those removing it from the bitmap */
+     temp->subscribed = set_map(sender, 0, temp->subscribed);
+     temp->unreceived = set_map(sender, 0, temp->unreceived); 
+    }
+    else{
+      /* its trying to unsubscribe from channel its not subed 2 */
+      return SS_ERROR;
+    }
+  }
+  else{
+    /* there is no channel by that name */
+    return SS_ERROR;
+  }
 }
 
 /* uses the index to find the bit you want to change, sets the bit to the bool value 0 or 1 and then returns */

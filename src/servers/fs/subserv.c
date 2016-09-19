@@ -172,6 +172,8 @@ int handle_push() {
   chan->content = malloc(chan->content_size);
   sys_vircopy(m_in.m_source, D, m_in.ss_pointer, SELF, D, chan->content, chan->content_size);
   
+  chan->unrecieved = chan->subscribed;
+  
   return SS_SUCCESS;
 }
 
@@ -189,7 +191,7 @@ int handle_pull() {
   
   printf("[subserv] got PULL\n");
   
-  chan = get_channel(&m_in.ss_name, channels);=
+  chan = get_channel(&m_in.ss_name, channels);
   
   if (chan == NULL) {
     /* TODO: Set errno */
@@ -209,6 +211,32 @@ int handle_pull() {
   }
   
   /* TODO: Write function */
+  /* Find size to copy */
+  if (chan->content_size > m_in.ss_int) {
+    copy_size = m_in.ss_int;
+  } else {
+    copy_size = chan->content_size;
+  }
+  
+  /* Copy and set received */
+  sys_vircopy(SELF, D, chan->content, m_in.m_source, D, m_in.ss_pointer, copy_size);
+  
+  chan->unrecieved = set_map(m.in_source, 0, chan->unreceived);
+  
+  /* Small memory optimisation
+   * Free content if there's nothing waiting to receive it
+   * Thanks Jayden
+   */
+  if (chan->unreceived == 0) {
+    /* Free previous content, copy new content */
+    if (chan->content != NULL) {
+      free(chan->content);
+      chan->content = NULL;
+      chan->content_size = 0;
+    }
+  }
+  
+  return SS_SUCCESS;
 }
 
 /**

@@ -23,15 +23,15 @@ PUBLIC int do_subserv() {
   /* Zero the rest of the name as soon as a \0 is found */
   for (index = 0; index < 15; index++) {
     if (terminated) {
-      m_in.m3_ca1[index] = 0;
+      m_in.ss_name[index] = 0;
     } else {
-      if (m_in.m3_ca1[index] == 0) {
+      if (m_in.ss_name[index] == 0) {
         terminated = 1;
       }
     }
   }
   
-  switch(m_in.m3_i1) {
+  switch(m_in.ss_status) {
     /* CREATE */
     case 0:
       retcode = handle_create();
@@ -56,9 +56,14 @@ PUBLIC int do_subserv() {
     case 5:
       retcode = handle_unsubscribe();
       break;
+    default:
+      retcode = SS_ERROR;
   }
   
   /* TODO: Send message back */
+  m_out.ss_status = retcode;
+  
+  return OK;
 }
 
 struct channel* create_channel(char *name, char oid) {
@@ -159,13 +164,13 @@ int handle_push() {
     free(chan->content);
   }
   
-  if (m_in.m3_i2 > chan->min_buffer) {
+  if (m_in.ss_int > chan->min_buffer) {
     chan->content_size = chan->min_buffer;
   } else {
-    chan->content_size = m_in.m3_i2;
+    chan->content_size = m_in.ss_int;
   }
   chan->content = malloc(chan->content_size);
-  sys_vircopy(m_in.m_source, D, m_in.m3_p1, SELF, D, chan->content, chan->content_size);
+  sys_vircopy(m_in.m_source, D, m_in.ss_pointer, SELF, D, chan->content, chan->content_size);
   
   return SS_SUCCESS;
 }

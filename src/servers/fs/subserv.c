@@ -86,12 +86,21 @@ int handle_create() {
   /* Check channel doesn't exist
    * All other functions make sure the channel *does* exist. Not this one
    */
-  if (chan == NULL) {
+  if (chan != NULL) {
+    /* Check owner of channel */
+    if (m_in.m_source == chan->oid) {
+      /* You own this, yay! */
+      return SS_SUCCESS;
+    }
+  
     /* TODO: Set errno */
     return SS_ERROR;
   }
   
-  /* TODO: Write function */
+  chan = create_channel(&m_in.ss_name, m_in.m_source);
+  channels = add_channel(chan, channels);
+  
+  return SS_SUCCESS;
 }
 
 /**

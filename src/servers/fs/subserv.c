@@ -75,8 +75,22 @@ int handle_create() {
    * Create channel struct, set values
    * Send back
    */
+  CHANNEL *chan;
+  char ind;
+  
   printf("[subserv] got CREATE\n");
-  /* TODO: Check for erroneous message */
+  
+  chan = get_channel(m_in.m3_ca1);
+  
+  /* Error checking */
+  /* Check channel doesn't exist
+   * All other functions make sure the channel *does* exist. Not this one
+   */
+  if (chan == NULL) {
+    /* TODO: Set errno */
+    return SS_ERROR;
+  }
+  
   /* TODO: Write function */
 }
 

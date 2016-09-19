@@ -94,7 +94,7 @@ int handle_close() {
   
   printf("[subserv] got CLOSE\n");
   
-  chan = find_channel(m_in.m3_ca1);
+  chan = get_channel(m_in.m3_ca1);
   
   /* Error checking */
   /* Check channel actually exists */
@@ -108,7 +108,9 @@ int handle_close() {
     return SS_ERROR;
   }
   
-  /* TODO: Write function */
+  channels = remove_channel(m_in.ss_name, channels);
+  
+  return SS_SUCCESS;
 }
 
 /**
@@ -126,7 +128,7 @@ int handle_push() {
   
   printf("[subserv] got PUSH\n");
   
-  chan = find_channel(m_in.m3_ca1);
+  chan = get_channel(m_in.m3_ca1);
   
   /* Error checking */
   /* Check channel actually exists */

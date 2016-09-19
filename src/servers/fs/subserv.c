@@ -12,7 +12,7 @@
 #include "subserveList.c"
 #include <stdio.h>
 
-struct channel *channels = NULL;
+CHANNEL *channels = NULL;
 
 PUBLIC int do_subserv() {
   /* TODO: check message status code, act accordingly */
@@ -103,7 +103,7 @@ int handle_push() {
    * Free previous stored data
    * Copy data to this
    */
-  struct channel *chan;
+  CHANNEL *chan;
   char ind;
   
   
@@ -150,7 +150,7 @@ int handle_pull() {
    * Copy data
    * Set message data
    */
-  struct channel *chan;
+  CHANNEL *chan;
   int copy_size;
   
   printf("[subserv] got PULL\n");

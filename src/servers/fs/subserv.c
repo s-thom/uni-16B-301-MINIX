@@ -139,7 +139,7 @@ int handle_push() {
    * Free previous stored data
    * Copy data to this
    */
-  struct channel chan;
+  struct channel *chan;
   char ind;
   
   
@@ -184,8 +184,30 @@ int handle_pull() {
    * Copy data
    * Set message data
    */
+  struct channel *chan;
+  int copy_size;
+  
   printf("[subserv] got PULL\n");
-  /* TODO: Check for erroneous message */
+  
+  chan = get_channel(&m_in.ss_name, channels);=
+  
+  if (chan == NULL) {
+    /* TODO: Set errno */
+    return SS_ERROR;
+  }
+  
+  /* Ensure puller is subscribed */
+  if (!get_map(m_in.m_source, chan->subscribed)) {
+    /* TODO: Set errno */
+    return SS_ERROR;
+  }
+  
+  /* Subscribers should only recieve each content once */
+  if (!get_map(m_in.m_source, chan->unreceived)) {
+    /* TODO: Set errno */
+    return SS_ERROR;
+  }
+  
   /* TODO: Write function */
 }
 

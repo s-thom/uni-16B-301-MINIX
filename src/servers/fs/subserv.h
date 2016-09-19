@@ -4,19 +4,28 @@
 #ifndef SUBSERV
 #define SUBSERV
 
-typedef struct channel CHANNEL;
+#define SS_ERROR 0
+#define SS_SUCCESS 1
+
+#define ss_status m3_i1
+#define ss_name m3_ca1
+#define ss_pointer m3_p1
+#define ss_int m3_p1
+
+
 /* Holds information about a channel */
+typedef struct channel CHANNEL;
 struct channel {
   char name[15];
   char oid;
   
   long subscribed;
   long unreceived;
-  long waiting;
+  
+  int content_size;
+  int min_buffer;
   
   void *content;
-  int content_size;
-  
   struct channel *next;
 };
 

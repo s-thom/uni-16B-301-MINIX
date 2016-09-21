@@ -14,6 +14,7 @@ int main(){
 	subscribe("Rgen"); 
 
 	while(1){
+	sleep(5);
 		pull("Rgen", &r, sizeof(int));
 		printf("Random received %d\n", r);	
 

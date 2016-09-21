@@ -29,9 +29,9 @@ CHANNEL *remove_channel(char name[], CHANNEL *root){
         /* its the root */
         placeHolder = temp->next;
         
-        if(content != NULL){
+        if(temp->content != NULL){
           /* frees stored date seg */          
-          free(content);
+          free(temp->content);
         }
         
         free(temp);
@@ -86,9 +86,9 @@ struct channel* create_channel(char *name, char oid) {
   nc->oid = oid;
   nc->subscribed = 0;
   nc->unreceived = 0;
-  nc->waiting = 0;
   nc->content = NULL;
   nc->content_size = 0;
+  nc->min_buffer = 0;
   nc->next = NULL;
   
   return nc;

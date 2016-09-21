@@ -80,7 +80,7 @@ int handle_create() {
   
   printf("[subserv] got CREATE\n");
   
-  chan = get_channel(m_in.m3_ca1);
+  chan = get_channel(m_in.m3_ca1, channels);
   
   /* Error checking */
   /* Check channel doesn't exist
@@ -97,7 +97,7 @@ int handle_create() {
     return SS_ERROR;
   }
   
-  chan = create_channel(&m_in.ss_name, m_in.m_source);
+  chan = create_channel(m_in.ss_name, m_in.m_source);
   channels = add_channel(chan, channels);
   
   return SS_SUCCESS;
@@ -117,7 +117,7 @@ int handle_close() {
   
   printf("[subserv] got CLOSE\n");
   
-  chan = get_channel(m_in.m3_ca1);
+  chan = get_channel(m_in.m3_ca1, channels);
   
   /* Error checking */
   /* Check channel actually exists */
@@ -151,7 +151,7 @@ int handle_push() {
   
   printf("[subserv] got PUSH\n");
   
-  chan = get_channel(m_in.m3_ca1);
+  chan = get_channel(m_in.m3_ca1, channels);
   
   /* Error checking */
   /* Check channel actually exists */
@@ -176,9 +176,9 @@ int handle_push() {
     chan->content_size = m_in.ss_int;
   }
   chan->content = malloc(chan->content_size);
-  sys_vircopy(m_in.m_source, D, m_in.ss_pointer, SELF, D, chan->content, chan->content_size);
+  sys_vircopy(m_in.m_source, D, (int) m_in.ss_pointer, SELF, D, (int) chan->content, chan->content_size);
   
-  chan->unrecieved = chan->subscribed;
+  chan->unreceived = chan->subscribed;
   
   return SS_SUCCESS;
 }
@@ -197,7 +197,7 @@ int handle_pull() {
   
   printf("[subserv] got PULL\n");
   
-  chan = get_channel(&m_in.ss_name, channels);
+  chan = get_channel(m_in.ss_name, channels);
   
   if (chan == NULL) {
     /* TODO: Set errno */
@@ -225,9 +225,9 @@ int handle_pull() {
   }
   
   /* Copy and set received */
-  sys_vircopy(SELF, D, chan->content, m_in.m_source, D, m_in.ss_pointer, copy_size);
-  
-  chan->unrecieved = set_map(m.in_source, 0, chan->unreceived);
+  sys_vircopy(SELF, D, (int) chan->content, m_in.m_source, D, (int) m_in.ss_pointer, copy_size);
+
+  chan->unreceived = set_map(m_in.m_source, 0, chan->unreceived);
   
   /* Small memory optimisation
    * Free content if there's nothing waiting to receive it
@@ -254,12 +254,14 @@ int handle_subscribe() {
    * Add proc to subscribers
    * Send back
    */
+  CHANNEL *temp;
+  int sender; 
   printf("[subserv] got SUBSCRIBE\n");
   /* TODO: Check for erroneous message */
   /* TODO: Write function */
 
-  CHANNEL *temp = get_channel(m_in.ss_name, channels);
-  int sender = m_in.m_source;
+  temp = get_channel(m_in.ss_name, channels);
+  sender = m_in.m_source;
 
   /* checks to insure the channel exists */
   if(temp != NULL){
@@ -295,13 +297,15 @@ int handle_unsubscribe() {
    * Remove proc from subscribers
    * Send back
    */
+  CHANNEL *temp;
+  int sender; 
   printf("[subserv] got UNSUBSCRIBE\n");
   /* TODO: Check for erroneous message */
   /* TODO: Write function */
   /* m_in */
 
-  CHANNEL *temp = get_channel(m_in.ss_name, channels);
-  int sender = m_in.m_source  
+  temp = get_channel(m_in.ss_name, channels);
+  sender = m_in.m_source;  
   
   /* checks to see if that channel is in the list */
   if(temp != NULL){

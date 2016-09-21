@@ -220,19 +220,6 @@ int handle_pull() {
 
   chan->unreceived = set_map(m_in.m_source, 0, chan->unreceived);
   
-  /* Small memory optimisation
-   * Free content if there's nothing waiting to receive it
-   * Thanks Jayden
-   */
-  if (chan->unreceived == 0) {
-    /* Free previous content, copy new content */
-    if (chan->content != NULL) {
-      free(chan->content);
-      chan->content = NULL;
-      chan->content_size = 0;
-    }
-  }
-  
   return SS_SUCCESS;
 }
 

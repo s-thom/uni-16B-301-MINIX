@@ -77,9 +77,6 @@ int handle_create() {
    */
   CHANNEL *chan;
   char ind;
-  
-  printf("[subserv] got CREATE\n");
-  
   chan = get_channel(m_in.m3_ca1, channels);
   
   /* Error checking */
@@ -114,9 +111,6 @@ int handle_close() {
    */  
   CHANNEL *chan;
   char ind;
-  
-  printf("[subserv] got CLOSE\n");
-  
   chan = get_channel(m_in.m3_ca1, channels);
   
   /* Error checking */
@@ -147,10 +141,6 @@ int handle_push() {
    */
   CHANNEL *chan;
   char ind;
-  
-  
-  printf("[subserv] got PUSH\n");
-  
   chan = get_channel(m_in.m3_ca1, channels);
   
   /* Error checking */
@@ -176,10 +166,7 @@ int handle_push() {
     chan->content_size = m_in.ss_int;
   }
   chan->content = malloc(chan->content_size);
-  sys_vircopy(m_in.m_source, D, m_in.ss_pointer, SELF, D, chan->content, chan->content_size);
-  
-  printf("[SS] value = %d\n", (int) *((int *) chan->content));
-  
+  sys_vircopy(m_in.m_source, D, m_in.ss_pointer, SELF, D, chan->content, chan->content_size);  
   chan->unreceived = chan->subscribed;
   
   return SS_SUCCESS;
@@ -196,28 +183,22 @@ int handle_pull() {
    */
   CHANNEL *chan;
   int copy_size;
-  
-  printf("[subserv] got PULL\n");
-  
   chan = get_channel(m_in.ss_name, channels);
   
   if (chan == NULL) {
     /* TODO: Set errno */
-    printf("no channel\n");
     return SS_ERROR;
   }
   
   /* Ensure puller is subscribed */
   if (!get_map(m_in.m_source, chan->subscribed)) {
     /* TODO: Set errno */
-    printf("not subscribed\n");
     return SS_ERROR;
   }
   
   /* Subscribers should only recieve each content once */
   if (!get_map(m_in.m_source, chan->unreceived)) {
     /* TODO: Set errno */
-    printf("already seen\n");
     return SS_ERROR;
   }
   
@@ -260,8 +241,7 @@ int handle_subscribe() {
    * Send back
    */
   CHANNEL *temp;
-  int sender; 
-  printf("[subserv] got SUBSCRIBE\n");
+  int sender;
   /* TODO: Check for erroneous message */
   /* TODO: Write function */
 
@@ -303,8 +283,7 @@ int handle_unsubscribe() {
    * Send back
    */
   CHANNEL *temp;
-  int sender; 
-  printf("[subserv] got UNSUBSCRIBE\n");
+  int sender;
   /* TODO: Check for erroneous message */
   /* TODO: Write function */
   /* m_in */

@@ -54,7 +54,6 @@ CHANNEL *remove_channel(char name[], CHANNEL *root){
 
 /* adds the new node to the front of the list */
 CHANNEL *add_channel(CHANNEL *new, CHANNEL *root){
-  printf("adding struct %s\n", new->name);  
   new->next = root;
   return new;
 }
@@ -62,8 +61,7 @@ CHANNEL *add_channel(CHANNEL *new, CHANNEL *root){
 /* returns a pointer */
 CHANNEL *get_channel(char name[], CHANNEL *root){  
   
-  while(root != NULL){
-    printf("comp = %s and %s\n", name, root->name);
+  while(root != NULL){    
     if(strncmp(name, root->name, 14) == 0){
       return root;
     }    

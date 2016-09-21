@@ -72,7 +72,7 @@ CHANNEL *get_channel(char name[], CHANNEL *root){
   return NULL;
 }
 
-struct channel* create_channel(char *name, char oid) {
+struct channel* create_channel(char *name, char oid, int size) {
   struct channel *nc = (struct channel*) malloc(sizeof(struct channel));
   int i;
   
@@ -88,7 +88,7 @@ struct channel* create_channel(char *name, char oid) {
   nc->unreceived = 0;
   nc->content = NULL;
   nc->content_size = 0;
-  nc->min_buffer = 0;
+  nc->min_buffer = size;
   nc->next = NULL;
   
   return nc;

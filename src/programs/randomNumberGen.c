@@ -11,14 +11,14 @@ int main(){
 
 	srand(time(NULL));
 
-	create_channel("Rgen"); 
+	create_channel("Rgen", sizeof(int)); 
 
 	while(1){
 		r = rand(); 		
 
-		sleep(5);
 		op = push("Rgen", &r, sizeof(int));
 		printf("Random Number %d was pushed to the channel Rgen and the opcode = %d\n", r, op);
+		sleep(5);
 	}
 
 }

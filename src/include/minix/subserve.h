@@ -26,13 +26,14 @@ number in table = 69
 /* a user proccess calls create_channel when it has something it wants to send to multiple other user proccess
 a channel is then created which the proccess can then input data into like a stream
 */
-int create_channel(char name[]){
+int create_channel(char name[], int size){
 	
 	int op;
 
 	message *m = (message*) malloc(sizeof(message));
 	m->m_type = SUBNUMBER;
 	m->m3_i1 = CREATECHANNEL;
+	m->m3_i2 = size;
 	strcpy(m->m3_ca1, name);
 
 	_sendrec(FS, m);

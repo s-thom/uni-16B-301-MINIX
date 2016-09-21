@@ -97,7 +97,7 @@ int handle_create() {
     return SS_ERROR;
   }
   
-  chan = create_channel(m_in.ss_name, m_in.m_source);
+  chan = create_channel(m_in.ss_name, m_in.m_source, m_in.ss_int);
   channels = add_channel(chan, channels);
   
   return SS_SUCCESS;
@@ -176,7 +176,9 @@ int handle_push() {
     chan->content_size = m_in.ss_int;
   }
   chan->content = malloc(chan->content_size);
-  sys_vircopy(m_in.m_source, D, (int) m_in.ss_pointer, SELF, D, (int) chan->content, chan->content_size);
+  sys_vircopy(m_in.m_source, D, m_in.ss_pointer, SELF, D, chan->content, chan->content_size);
+  
+  printf("[SS] value = %d\n", (int) *((int *) chan->content));
   
   chan->unreceived = chan->subscribed;
   
@@ -201,18 +203,21 @@ int handle_pull() {
   
   if (chan == NULL) {
     /* TODO: Set errno */
+    printf("no channel\n");
     return SS_ERROR;
   }
   
   /* Ensure puller is subscribed */
   if (!get_map(m_in.m_source, chan->subscribed)) {
     /* TODO: Set errno */
+    printf("not subscribed\n");
     return SS_ERROR;
   }
   
   /* Subscribers should only recieve each content once */
   if (!get_map(m_in.m_source, chan->unreceived)) {
     /* TODO: Set errno */
+    printf("already seen\n");
     return SS_ERROR;
   }
   
@@ -225,7 +230,7 @@ int handle_pull() {
   }
   
   /* Copy and set received */
-  sys_vircopy(SELF, D, (int) chan->content, m_in.m_source, D, (int) m_in.ss_pointer, copy_size);
+  sys_vircopy(SELF, D, chan->content, m_in.m_source, D, m_in.ss_pointer, copy_size);
 
   chan->unreceived = set_map(m_in.m_source, 0, chan->unreceived);
   
@@ -274,8 +279,8 @@ int handle_subscribe() {
     }
     else{
       /* not already in the bitmap */
-      set_map(sender, 1, temp->subscribed);
-      set_map(sender, 1, temp->unreceived);
+      temp->subscribed = set_map(sender, 1, temp->subscribed);
+      temp->unreceived = set_map(sender, 1, temp->unreceived);
     }
     
     m_out.ss_int = temp->min_buffer;

@@ -8,15 +8,19 @@ int main(){
 	
 	int r;
 	int op;
+	int active = 0;
 
 	srand(time(NULL));
 
-	subscribe("Rgen"); 
+  while (!active) {
+	  active = subscribe("Rgen"); 
+    sleep(1);
+  }
 
 	while(1){
-	sleep(5);
-		pull("Rgen", &r, sizeof(int));
-		printf("Random received %d\n", r);	
+		op = pull("Rgen", &r, sizeof(int));
+		printf("Random received %d, opcode %d\n", r, op);	
+	sleep(2);
 
 	}
 }

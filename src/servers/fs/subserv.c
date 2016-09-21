@@ -190,6 +190,11 @@ int handle_pull() {
     return SS_ERROR;
   }
   
+  if (chan->content == NULL) {
+    /* TODO: Set errno */
+    return SS_ERROR;
+  }
+  
   /* Ensure puller is subscribed */
   if (!get_map(m_in.m_source, chan->subscribed)) {
     /* TODO: Set errno */

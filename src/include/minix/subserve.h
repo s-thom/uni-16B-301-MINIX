@@ -120,7 +120,7 @@ int subscribe(char name[]){
 	op = m->m3_i1;
 	free(m);
 
-	return op;
+	return m->m3_i2;
 }
 
 /* unsubscribe removes you from the the subscribed bitmap and means the server will know longer hold the value, waiting for you */

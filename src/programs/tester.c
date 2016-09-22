@@ -3,7 +3,7 @@
 #include <minix/subserve.h>
 
 #define MAX_SPACE 1024
-#define NUM_ITER 20480
+#define NUM_ITER 204800
 
 char space[MAX_SPACE];
 struct test {
@@ -14,6 +14,7 @@ struct test {
 int main() {
   int success;
   int it;
+  int total;
   struct test data;
   
   printf("---- TEST: Create channel ----\n");
@@ -105,19 +106,21 @@ int main() {
   printf("result: %d\n", success == 0);
   
   printf("---- TEST: Lots of open close ----\n");
+  total = 0;
   for (it = 0; it < NUM_ITER; it++) {
-    create_channel("spam channel", sizeof(struct test));
-    close_channel("spam channel");
+    total += create_channel("spam channel", sizeof(struct test));
+    total += close_channel("spam channel");
   }
-  printf("result: Indeterminate\n");
+  printf("result: %d\n", total == (2 * NUM_ITER));
   
   printf("---- TEST: Lots of push ----\n");
+  total = 0;
   create_channel("toast channel", sizeof(struct test));
   for (it = 0; it < NUM_ITER; it++) {
-    push("test channel", &data, MAX_SPACE);
+    total += push("toast channel", &data, MAX_SPACE);
   }
   close_channel("toast channel");
-  printf("result: Indeterminate\n");
+  printf("result: %d\n", total == NUM_ITER);
   
   return 0;
 }

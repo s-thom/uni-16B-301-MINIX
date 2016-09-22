@@ -190,6 +190,11 @@ int handle_pull() {
     return SS_ERROR;
   }
   
+  if (chan->content == NULL) {
+    /* TODO: Set errno */
+    return SS_ERROR;
+  }
+  
   /* Ensure puller is subscribed */
   if (!get_map(m_in.m_source, chan->subscribed)) {
     /* TODO: Set errno */
@@ -214,19 +219,6 @@ int handle_pull() {
   sys_vircopy(SELF, D, chan->content, m_in.m_source, D, m_in.ss_pointer, copy_size);
 
   chan->unreceived = set_map(m_in.m_source, 0, chan->unreceived);
-  
-  /* Small memory optimisation
-   * Free content if there's nothing waiting to receive it
-   * Thanks Jayden
-   */
-  if (chan->unreceived == 0) {
-    /* Free previous content, copy new content */
-    if (chan->content != NULL) {
-      free(chan->content);
-      chan->content = NULL;
-      chan->content_size = 0;
-    }
-  }
   
   return SS_SUCCESS;
 }

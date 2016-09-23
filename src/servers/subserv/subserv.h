@@ -4,6 +4,13 @@
 #ifndef SUBSERV
 #define SUBSERV
 
+#include <minix/ipc.h>
+#include <stdlib.h>
+
+#include "type.h"
+#include "glo.h"
+#include "functions.h"
+
 #define SS_ERROR 0
 #define SS_SUCCESS 1
 
@@ -14,32 +21,8 @@
 
 
 /* Holds information about a channel */
-typedef struct channel CHANNEL;
-struct channel {
-  char name[15];
-  char oid;
-  
-  long subscribed;
-  long unreceived;
-  
-  int content_size;
-  int min_buffer;
-  
-  void *content;
-  struct channel *next;
-};
 
-/* Function prototypes */
 
-int do_subserv();
-int handle_create();
-int handle_close();
-int handle_push();
-int handle_pull();
-int handle_subscribe();
-int handle_unsubscribe();
-long set_map(int index, int boolean, long current_map);
-int get_map(int index, long current_map);
 
 #endif
 

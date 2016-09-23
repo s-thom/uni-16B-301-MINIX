@@ -1,14 +1,7 @@
 /* Holds the main function for the subscription server
  */
- 
-#include "fs.h"
-#include <minix/callnr.h>
-#include <minix/com.h>
-
 #include "subserv.h"
-#include <stddef.h>
 #include <string.h>
-#include <stdlib.h>
 #include "subserveList.c"
 #include <stdio.h>
 

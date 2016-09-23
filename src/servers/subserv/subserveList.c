@@ -1,6 +1,5 @@
 #include "subserv.h"
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 
 /* checks if the channel is already in the list and if it is return 1 */

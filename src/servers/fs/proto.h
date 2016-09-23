@@ -151,9 +151,6 @@ _PROTOTYPE( int do_fstat, (void)					);
 _PROTOTYPE( int do_stat, (void)						);
 _PROTOTYPE( int do_fstatfs, (void)					);
 
-/* subserv.c */
-_PROTOTYPE( int do_subserv, (void));
-
 /* super.c */
 _PROTOTYPE( bit_t alloc_bit, (struct super_block *sp, int map, bit_t origin));
 _PROTOTYPE( void free_bit, (struct super_block *sp, int map,

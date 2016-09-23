@@ -64,8 +64,6 @@
 
 #define REBOOT		  76	/* to PM */
 
-#define SUBSERVE          69    /* sub server is a subscription service */
-
 /* MINIX specific calls, e.g., to support system services. */
 #define SVRCTL		  77
 				/* unused */

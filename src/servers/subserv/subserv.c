@@ -7,7 +7,7 @@
 
 CHANNEL *channels = NULL;
 
-PUBLIC int do_subserv() {
+int do_subserv() {
   /* TODO: check message status code, act accordingly */
   int retcode;
   char index;
@@ -56,7 +56,7 @@ PUBLIC int do_subserv() {
   /* TODO: Send message back */
   m_out.ss_status = retcode;
   
-  return OK;
+  return retcode;
 }
 
 /**

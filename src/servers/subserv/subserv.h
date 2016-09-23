@@ -19,10 +19,5 @@
 #define ss_pointer m3_p1
 #define ss_int m3_i2
 
-
-/* Holds information about a channel */
-
-
-
 #endif
 

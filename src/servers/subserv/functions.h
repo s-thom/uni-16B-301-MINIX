@@ -1,7 +1,8 @@
 /* Function prototypes */
 
 /* main.c */
-
+int main();
+void get_work();
 
 /* subserv.c */
 int do_subserv();

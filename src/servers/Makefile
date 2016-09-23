@@ -21,6 +21,7 @@ all install depend clean:
 	cd ./is && $(MAKE) $@
 	cd ./init && $(MAKE) $@
 	cd ./inet && $(MAKE) $@
+	cd ./subserv && $(MAKE) $@
 
 image:
 	cd ./pm && $(MAKE) EXTRA_OPTS=$(EXTRA_OPTS) build

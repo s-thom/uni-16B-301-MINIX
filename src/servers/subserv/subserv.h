@@ -1,6 +1,3 @@
-/* Hold the types and struct definitions used by the subscription server
- */
-
 #ifndef SUBSERV
 #define SUBSERV
 
@@ -11,6 +8,10 @@
 #include "glo.h"
 #include "functions.h"
 
+/* Cheatily define D instead of messily including a lot */
+#define D 1
+
+/* Definitions */
 #define SS_ERROR 0
 #define SS_SUCCESS 1
 

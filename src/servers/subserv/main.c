@@ -1,6 +1,10 @@
 #include <string.h>
 #include <stdio.h>
 
+#include <minix/type.h>
+#include <minix/com.h>
+#include <minix/syslib.h>
+
 #include "subserv.h"
 #include "subserv.c"
 

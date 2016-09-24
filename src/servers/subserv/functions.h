@@ -1,17 +1,17 @@
 /* Function prototypes */
 
 /* main.c */
-int main();
-void get_work();
+int main(void);
+void get_work(void);
 
 /* subserv.c */
-int do_subserv();
-int handle_create();
-int handle_close();
-int handle_push();
-int handle_pull();
-int handle_subscribe();
-int handle_unsubscribe();
+int do_subserv(void);
+int handle_create(void);
+int handle_close(void);
+int handle_push(void);
+int handle_pull(void);
+int handle_subscribe(void);
+int handle_unsubscribe(void);
 long set_map(int index, int boolean, long current_map);
 int get_map(int index, long current_map);
 

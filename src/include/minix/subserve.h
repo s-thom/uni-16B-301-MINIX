@@ -26,17 +26,44 @@ number in table = 69
 /* a user proccess calls create_channel when it has something it wants to send to multiple other user proccess
 a channel is then created which the proccess can then input data into like a stream
 */
-int create_channel(char name[], int size){
-	
-	int op;
 
+int subserv_pn = -1;
+
+int get_subserv_procnr(void) {
+  char *name;
+  message *m;
+  
+  printf("about to ask for ss's number\n");
+  
+  name = "subserv";
+  m = (message*) malloc(sizeof(message));
+	m->m_type = 80;
+  m->m1_p1 = name;
+  m->m1_i1 = -1;
+  m->m1_i2 = 7;
+  
+	_sendrec(MM, m);
+	
+	subserv_pn = m->m3_i1;
+	
+	printf("subserv's pn is %d\n", subserv_pn);
+	return subserv_pn;
+}
+
+int create_channel(char name[], int size){
+	int op;
 	message *m = (message*) malloc(sizeof(message));
+	
+	if (subserv_pn <= 0) {
+	  get_subserv_procnr();
+	}
+	
 	m->m_type = SUBNUMBER;
 	m->m3_i1 = CREATECHANNEL;
 	m->m3_i2 = size;
-	strcpy(m->m3_ca1, name);
+	strncpy(m->m3_ca1, name, 14);
 
-	_sendrec(FS, m);
+	_sendrec(subserv_pn, m);
 	op = m->m3_i1;
 	free(m);
 
@@ -48,15 +75,18 @@ int create_channel(char name[], int size){
 thus resources on the subcription server
 */
 int close_channel(char name[]){
-	
-	int op;	
-		
+	int op;
 	message *m = (message*) malloc(sizeof(message));
+	
+	if (subserv_pn <= 0) {
+	  get_subserv_procnr();
+	}
+	
 	m->m_type = SUBNUMBER;
 	m->m3_i1 = CLOSECHANNEL;
-	strcpy(m->m3_ca1, name);
+	strncpy(m->m3_ca1, name, 14);
 
-	_sendrec(FS, m);
+	_sendrec(subserv_pn, m);
 	
 	op = m->m3_i1;
 	free(m);
@@ -66,17 +96,20 @@ int close_channel(char name[]){
 
 /* push sends the data which the data pointer is pointing to and copies it to all proccess subscripted to it that channel */
 int push(char name[], void* data, size_t size){
-	
 	int op;
-
 	message *m = (message*) malloc(sizeof(message));
+	
+	if (subserv_pn <= 0) {
+	  get_subserv_procnr();
+	}
+	
 	m->m_type = SUBNUMBER;
 	m->m3_i1 = PUSHC;
-	strcpy(m->m3_ca1, name);
+	strncpy(m->m3_ca1, name, 14);
 	m->m3_p1 = (char*) data;
 	m->m3_i2 = size;
 
-	_sendrec(FS, m);
+	_sendrec(subserv_pn, m);
 	
 	op = m->m3_i1;
 	free(m);
@@ -89,15 +122,19 @@ size specifies the max amount of memory you have for data to be sent to you
 */
 int pull(char name[], void*data, size_t size){
 	int op;
-
 	message *m = (message*) malloc(sizeof(message));
+	
+	if (subserv_pn <= 0) {
+	  get_subserv_procnr();
+	}
+	
 	m->m_type = SUBNUMBER;
 	m->m3_i1 = PULLC;
-	strcpy(m->m3_ca1, name);
+	strncpy(m->m3_ca1, name, 14);
 	m->m3_p1 = (char*) data;
 	m->m3_i2 = size;
 		
-	_sendrec(FS, m);
+	_sendrec(subserv_pn, m);
 	
 	op = m->m3_i1;
 	free(m);
@@ -110,13 +147,17 @@ you have got around to calling pull and requesting it
 */
 int subscribe(char name[]){
 	int op;
-
 	message *m = (message*) malloc(sizeof(message));
+	
+	if (subserv_pn <= 0) {
+	  get_subserv_procnr();
+	}
+	
 	m->m_type = SUBNUMBER;
 	m->m3_i1 = SUBC;
-	strcpy(m->m3_ca1, name);
+	strncpy(m->m3_ca1, name, 14);
 
-	_sendrec(FS, m);
+	_sendrec(subserv_pn, m);
 	op = m->m3_i1;
 	free(m);
 
@@ -126,13 +167,17 @@ int subscribe(char name[]){
 /* unsubscribe removes you from the the subscribed bitmap and means the server will know longer hold the value, waiting for you */
 int unsubscribe(char name[]){
 	int op;
-
 	message *m = (message*) malloc(sizeof(message));
+	
+	if (subserv_pn <= 0) {
+	  get_subserv_procnr();
+	}
+	
 	m->m_type = SUBNUMBER;
 	m->m3_i1 = UNSUBC;
-	strcpy(m->m3_ca1, name);
+	strncpy(m->m3_ca1, name, 14);
 
-	_sendrec(FS, m);
+	_sendrec(subserv_pn, m);
 	op = m->m3_i1;
 	free(m);
 

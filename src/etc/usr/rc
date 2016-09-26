@@ -102,6 +102,7 @@ start)
     done
     up inet ""
     up printer "" /dev/lp
+    up subserv
     echo .
 
     # Network initialization.

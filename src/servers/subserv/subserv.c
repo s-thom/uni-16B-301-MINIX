@@ -1,9 +1,7 @@
 /* Holds the main function for the subscription server
  */
 #include "subserv.h"
-#include <string.h>
 #include "subserveList.c"
-#include <stdio.h>
 
 CHANNEL *channels = NULL;
 

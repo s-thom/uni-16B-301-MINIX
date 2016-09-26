@@ -1,8 +1,12 @@
 #ifndef SUBSERV
 #define SUBSERV
 
-#include <minix/ipc.h>
+#include <lib.h>
+#include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+#include <minix/syslib.h>
+#include <minix/ipc.h>
 
 #include "type.h"
 #include "glo.h"

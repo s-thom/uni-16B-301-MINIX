@@ -1,6 +1,3 @@
-#include <string.h>
-#include <stdio.h>
-
 #include "subserv.h"
 #include "subserv.c"
 

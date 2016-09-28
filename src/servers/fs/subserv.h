@@ -40,6 +40,7 @@ int handle_subscribe();
 int handle_unsubscribe();
 long set_map(int index, int boolean, long current_map);
 int get_map(int index, long current_map);
+void info(void);
 
 #endif
 

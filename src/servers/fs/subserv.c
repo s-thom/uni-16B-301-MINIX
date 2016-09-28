@@ -57,13 +57,13 @@ PUBLIC int do_subserv() {
       retcode = handle_unsubscribe();
       break;
     default:
-      retcode = SS_ERROR;
+      m_out.ss_status = SS_ERROR;
+      retcode = OK;
   }
   
   /* TODO: Send message back */
-  m_out.ss_status = retcode;
   
-  return OK;
+  return retcode;
 }
 
 /**
@@ -87,17 +87,20 @@ int handle_create() {
     /* Check owner of channel */
     if (m_in.m_source == chan->oid) {
       /* You own this, yay! */
-      return SS_SUCCESS;
+      m_out.ss_status = SS_SUCCESS;
+      return OK;
     }
   
     /* TODO: Set errno */
-    return SS_ERROR;
+    m_out.ss_status = SS_ERROR;
+    return OK;
   }
   
   chan = create_channel(m_in.ss_name, m_in.m_source, m_in.ss_int);
   channels = add_channel(chan, channels);
   
-  return SS_SUCCESS;
+  m_out.ss_status = SS_SUCCESS;
+  return OK;
 }
 
 /**
@@ -117,17 +120,20 @@ int handle_close() {
   /* Check channel actually exists */
   if (chan == NULL) {
     /* TODO: Set errno */
-    return SS_ERROR;
+    m_out.ss_status = SS_ERROR;
+    return OK;
   }
   /* Check owner of channel */
   if (m_in.m_source != chan->oid) {
     /* TODO: Set errno */
-    return SS_ERROR;
+    m_out.ss_status = SS_ERROR;
+    return OK;
   }
   
   channels = remove_channel(m_in.ss_name, channels);
   
-  return SS_SUCCESS;
+  m_out.ss_status = SS_SUCCESS;
+  return OK;
 }
 
 /**
@@ -147,12 +153,14 @@ int handle_push() {
   /* Check channel actually exists */
   if (chan == NULL) {
     /* TODO: Set errno */
-    return SS_ERROR;
+    m_out.ss_status = SS_ERROR;
+    return OK;
   }
   /* Check owner of channel */
   if (m_in.m_source != chan->oid) {
     /* TODO: Set errno */
-    return SS_ERROR;
+    m_out.ss_status = SS_ERROR;
+    return OK;
   }
   
   /* Free previous content, copy new content */
@@ -169,7 +177,8 @@ int handle_push() {
   sys_vircopy(m_in.m_source, D, m_in.ss_pointer, SELF, D, chan->content, chan->content_size);  
   chan->unreceived = chan->subscribed;
   
-  return SS_SUCCESS;
+  m_out.ss_status = SS_SUCCESS;
+  return OK;
 }
 
 /**
@@ -187,24 +196,28 @@ int handle_pull() {
   
   if (chan == NULL) {
     /* TODO: Set errno */
-    return SS_ERROR;
+    m_out.ss_status = SS_ERROR;
+    return OK;
   }
   
   if (chan->content == NULL) {
     /* TODO: Set errno */
-    return SS_ERROR;
+    m_out.ss_status = SS_ERROR;
+    return OK;
   }
   
   /* Ensure puller is subscribed */
   if (!get_map(m_in.m_source, chan->subscribed)) {
     /* TODO: Set errno */
-    return SS_ERROR;
+    m_out.ss_status = SS_ERROR;
+    return OK;
   }
   
   /* Subscribers should only recieve each content once */
   if (!get_map(m_in.m_source, chan->unreceived)) {
     /* TODO: Set errno */
-    return SS_ERROR;
+    m_out.ss_status = SS_ERROR;
+    return OK;
   }
   
   /* TODO: Write function */
@@ -220,7 +233,8 @@ int handle_pull() {
 
   chan->unreceived = set_map(m_in.m_source, 0, chan->unreceived);
   
-  return SS_SUCCESS;
+  m_out.ss_status = SS_SUCCESS;
+  return OK;
 }
 
 /**
@@ -256,12 +270,14 @@ int handle_subscribe() {
     }
     
     m_out.ss_int = temp->min_buffer;
-    return SS_SUCCESS; 
+    m_out.ss_status = SS_SUCCESS; 
+    return OK;
 
   }
   else{
     /* the channel doesnt exist that you tried to subscribe to */
-    return SS_ERROR;
+    m_out.ss_status = SS_ERROR;
+    return OK;
   }     
 }
 
@@ -290,16 +306,19 @@ int handle_unsubscribe() {
      /* sets sub and unrec to 0 those removing it from the bitmap */
      temp->subscribed = set_map(sender, 0, temp->subscribed);
      temp->unreceived = set_map(sender, 0, temp->unreceived);
-     return SS_SUCCESS;
+     m_out.ss_status = SS_SUCCESS;
+     return OK;
     }
     else{
       /* its trying to unsubscribe from channel its not subed 2 */
-      return SS_ERROR;
+      m_out.ss_status = SS_ERROR;
+      return OK;
     }
   }
   else{
     /* there is no channel by that name */
-    return SS_ERROR;
+    m_out.ss_status = SS_ERROR;
+    return OK;
   }
 }
 

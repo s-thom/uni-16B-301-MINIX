@@ -56,6 +56,10 @@ PUBLIC int do_subserv() {
     case 5:
       retcode = handle_unsubscribe();
       break;
+    /* INFO */
+    case 6:
+      retcode = info();
+      break;
     default:
       retcode = SS_ERROR;
   }

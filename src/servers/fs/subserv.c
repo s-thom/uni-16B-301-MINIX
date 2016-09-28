@@ -177,6 +177,8 @@ int handle_push() {
   sys_vircopy(m_in.m_source, D, m_in.ss_pointer, SELF, D, chan->content, chan->content_size);  
   chan->unreceived = chan->subscribed;
   
+  /* TODO: clear all waiting procs */
+  
   m_out.ss_status = SS_SUCCESS;
   return OK;
 }
@@ -191,16 +193,11 @@ int handle_pull() {
    * Set message data
    */
   CHANNEL *chan;
+  WPROC *waiting_proc;
   int copy_size;
   chan = get_channel(m_in.ss_name, channels);
   
   if (chan == NULL) {
-    /* TODO: Set errno */
-    m_out.ss_status = SS_ERROR;
-    return OK;
-  }
-  
-  if (chan->content == NULL) {
     /* TODO: Set errno */
     m_out.ss_status = SS_ERROR;
     return OK;
@@ -214,24 +211,20 @@ int handle_pull() {
   }
   
   /* Subscribers should only recieve each content once */
-  if (!get_map(m_in.m_source, chan->unreceived)) {
-    /* TODO: Set errno */
-    m_out.ss_status = SS_ERROR;
-    return OK;
+  if (chan->content == NULL || !get_map(m_in.m_source, chan->unreceived)) {
+    /* Set bit in waiting */
+    chan->waiting = set_map(m_in.m_source, 1, chan->waiting);
+    /* Add struct to list */
+    waiting_proc = create_waiting(m_in.m_source, m_in.ss_pointer, m_in.ss_int);
+    waiting_proc->next = chan->waiting_list;
+    chan->waiting_list = waiting_proc;
+    
+    printf("process %d should now be blocked!\n", waiting_proc->procnr);
+    
+    return SUSPEND;
   }
   
-  /* TODO: Write function */
-  /* Find size to copy */
-  if (chan->content_size > m_in.ss_int) {
-    copy_size = m_in.ss_int;
-  } else {
-    copy_size = chan->content_size;
-  }
-  
-  /* Copy and set received */
-  sys_vircopy(SELF, D, chan->content, m_in.m_source, D, m_in.ss_pointer, copy_size);
-
-  chan->unreceived = set_map(m_in.m_source, 0, chan->unreceived);
+  copy_to_proc(m_in.m_source, m_in.ss_pointer, m_in.ss_int, chan);
   
   m_out.ss_status = SS_SUCCESS;
   return OK;
@@ -349,5 +342,22 @@ int get_map(int index, long current_map){
   current_map = current_map >> index;
   return (int) current_map;
   
+}
+
+int copy_to_proc(int proc, void *pointer, int size, CHANNEL *chan) {
+  int copy_size;
+  /* Find size to copy */
+  if (chan->content_size > size) {
+    copy_size = size;
+  } else {
+    copy_size = chan->content_size;
+  }
+  
+  /* Copy and set received */
+  sys_vircopy(SELF, D, chan->content, proc, D, pointer, copy_size);
+
+  chan->unreceived = set_map(m_in.m_source, 0, chan->unreceived);
+  
+  return 1;
 }
 

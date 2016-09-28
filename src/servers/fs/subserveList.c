@@ -91,3 +91,14 @@ struct channel* create_channel(char *name, char oid, int size) {
   
   return nc;
 }
+
+WPROC* create_waiting(int proc, void *p, int size) {
+  WPROC *np = (WPROC*) malloc(sizeof(WPROC));
+  
+  np->procnr = proc;
+  np->content_size = size;
+  np->content = p;
+  np->next = NULL;
+  
+  return np;
+}

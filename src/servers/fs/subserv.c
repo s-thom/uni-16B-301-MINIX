@@ -307,7 +307,7 @@ int handle_unsubscribe() {
 }
 
 
-void info(void){
+int info(void){
   CHANNEL *currentC = channels;  
   
   if(currentC == NULL){

@@ -95,6 +95,10 @@ int main() {
   success = pull("test channel", &space, MAX_SPACE);
   printf("data is %d and %c\n", ((struct test*)space)->one, ((struct test*)space)->two);
   printf("result: %d\n", success == 1);
+
+  printf("---- TEST: info ----\n");
+  success = info();
+  printf("result: %d\n", success == 1);
   
   printf("---- TEST: Close channel last time ----\n");
   success = close_channel("test channel");

@@ -142,6 +142,9 @@ int unsubscribe(char name[]){
 }
 
 int info(){
+
+  int op;  
+
   message *m = (message*) malloc(sizeof(message));
   m->m_type = SUBNUMBER;
   m->m3_i1 = INFO;

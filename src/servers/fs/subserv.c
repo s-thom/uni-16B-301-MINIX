@@ -56,13 +56,16 @@ PUBLIC int do_subserv() {
     case 5:
       retcode = handle_unsubscribe();
       break;
+    /* INFO */
+    case 6:
+      retcode = info();
+      break;
     default:
       retcode = SS_ERROR;
   }
   
   /* TODO: Send message back */
   m_out.ss_status = retcode;
-  
   return OK;
 }
 
@@ -303,6 +306,44 @@ int handle_unsubscribe() {
   }
 }
 
+
+int info(void){
+  CHANNEL *currentC = channels;  
+  
+  if(currentC == NULL){
+    printf("There are currently no channels :(");
+  }
+  else{
+    printf("--------------------------------------------------------------------------------\n");
+    while(currentC != NULL){
+      
+      printf("%s : %d/%d\n", currentC->name, bitsSetInLong(currentC->unreceived), bitsSetInLong(currentC->subscribed));
+      currentC = currentC->next;
+    }
+    
+    printf("--------------------------------------------------------------------------------\n");
+  }
+  m_out.ss_status = SS_SUCCESS;
+  return OK;
+}
+
+/* checks how many bits are set in a bit map */
+int bitsSetInLong(long l){
+  int count = 0;
+  int i = 0;
+  long mask = 0x01;
+
+  while(i < 64){
+  
+    if((l & mask) == 1){
+      count++;
+    }
+    l = l>>1;  
+    i++;
+  }
+  return count;
+}
+
 /* uses the index to find the bit you want to change, sets the bit to the bool value 0 or 1 and then returns */
 long set_map(int index, int boolean, long current_map){
   
@@ -331,4 +372,5 @@ int get_map(int index, long current_map){
   return (int) current_map;
   
 }
+
 

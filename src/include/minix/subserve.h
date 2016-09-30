@@ -9,6 +9,8 @@
 #define PULLC 3
 #define SUBC 4
 #define UNSUBC 5
+#define INFO 6
+
 #define SUBNUMBER 69
 /*
 This file is the library that must be included by all programs wishing to use the subserve server
@@ -137,6 +139,21 @@ int unsubscribe(char name[]){
 	free(m);
 
 	return op;
+}
+
+int info(){
+
+  int op;  
+
+  message *m = (message*) malloc(sizeof(message));
+  m->m_type = SUBNUMBER;
+  m->m3_i1 = INFO;
+  
+  _sendrec(FS, m);
+	op = m->m3_i1;
+
+  free(m);
+  return op;
 }
 
 

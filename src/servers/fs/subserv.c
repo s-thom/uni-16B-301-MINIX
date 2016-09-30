@@ -373,7 +373,7 @@ int copy_to_proc(int proc, void *pointer, int size, CHANNEL *chan) {
   /* Copy and set received */
   sys_vircopy(SELF, D, chan->content, proc, D, pointer, copy_size);
 
-  chan->unreceived = set_map(m_in.m_source, 0, chan->unreceived);
+  chan->unreceived = set_map(proc, 0, chan->unreceived);
   
   return 1;
 }

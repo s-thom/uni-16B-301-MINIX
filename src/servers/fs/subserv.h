@@ -21,26 +21,39 @@ struct channel {
   
   long subscribed;
   long unreceived;
+  long waiting;
   
   int content_size;
   int min_buffer;
   
   void *content;
   struct channel *next;
+  struct wproc *waiting_list;
+};
+
+/* A process that is waiting for a message */
+typedef struct wproc WPROC;
+struct wproc {
+  int procnr;
+  int content_size;
+  
+  void *content;
+  struct wproc *next;
 };
 
 /* Function prototypes */
 
-int do_subserv();
-int handle_create();
-int handle_close();
-int handle_push();
-int handle_pull();
-int handle_subscribe();
-int handle_unsubscribe();
+int do_subserv(void);
+int handle_create(void);
+int handle_close(void);
+int handle_push(void);
+int handle_pull(void);
+int handle_subscribe(void);
+int handle_unsubscribe(void);
+int handle_info(void);
 long set_map(int index, int boolean, long current_map);
 int get_map(int index, long current_map);
-int info(void);
+int copy_to_proc(int proc, void *pointer, int size, CHANNEL *chan);
 
 #endif
 

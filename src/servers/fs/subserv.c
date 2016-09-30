@@ -61,12 +61,18 @@ PUBLIC int do_subserv() {
       retcode = info();
       break;
     default:
-      retcode = SS_ERROR;
+      m_out.ss_status = SS_ERROR;
+      retcode = OK;
   }
   
   /* TODO: Send message back */
+<<<<<<< HEAD
   m_out.ss_status = retcode;
   return OK;
+=======
+  
+  return retcode;
+>>>>>>> waiting
 }
 
 /**
@@ -90,17 +96,20 @@ int handle_create() {
     /* Check owner of channel */
     if (m_in.m_source == chan->oid) {
       /* You own this, yay! */
-      return SS_SUCCESS;
+      m_out.ss_status = SS_SUCCESS;
+      return OK;
     }
   
     /* TODO: Set errno */
-    return SS_ERROR;
+    m_out.ss_status = SS_ERROR;
+    return OK;
   }
   
   chan = create_channel(m_in.ss_name, m_in.m_source, m_in.ss_int);
   channels = add_channel(chan, channels);
   
-  return SS_SUCCESS;
+  m_out.ss_status = SS_SUCCESS;
+  return OK;
 }
 
 /**
@@ -120,17 +129,20 @@ int handle_close() {
   /* Check channel actually exists */
   if (chan == NULL) {
     /* TODO: Set errno */
-    return SS_ERROR;
+    m_out.ss_status = SS_ERROR;
+    return OK;
   }
   /* Check owner of channel */
   if (m_in.m_source != chan->oid) {
     /* TODO: Set errno */
-    return SS_ERROR;
+    m_out.ss_status = SS_ERROR;
+    return OK;
   }
   
   channels = remove_channel(m_in.ss_name, channels);
   
-  return SS_SUCCESS;
+  m_out.ss_status = SS_SUCCESS;
+  return OK;
 }
 
 /**
@@ -143,6 +155,8 @@ int handle_push() {
    * Copy data to this
    */
   CHANNEL *chan;
+  WPROC *waiting_proc;
+  message *proc_reply;
   char ind;
   chan = get_channel(m_in.m3_ca1, channels);
   
@@ -150,12 +164,14 @@ int handle_push() {
   /* Check channel actually exists */
   if (chan == NULL) {
     /* TODO: Set errno */
-    return SS_ERROR;
+    m_out.ss_status = SS_ERROR;
+    return OK;
   }
   /* Check owner of channel */
   if (m_in.m_source != chan->oid) {
     /* TODO: Set errno */
-    return SS_ERROR;
+    m_out.ss_status = SS_ERROR;
+    return OK;
   }
   
   /* Free previous content, copy new content */
@@ -172,7 +188,27 @@ int handle_push() {
   sys_vircopy(m_in.m_source, D, m_in.ss_pointer, SELF, D, chan->content, chan->content_size);  
   chan->unreceived = chan->subscribed;
   
-  return SS_SUCCESS;
+  /* Clear all waiting procs */
+  while (chan->waiting_list != NULL) {
+    waiting_proc = chan->waiting_list;
+    
+    /* Copy over */
+    copy_to_proc(waiting_proc->procnr, waiting_proc->content, waiting_proc->content_size, chan);
+    
+    /* Reply to process */
+    proc_reply = (message*) malloc(sizeof(message));
+    proc_reply->ss_status = SS_SUCCESS;
+    _send(waiting_proc->procnr, proc_reply);
+    
+    /* Free memory, set next one to go over */
+    free(proc_reply);
+    waiting_proc = waiting_proc->next;
+    free(chan->waiting_list);
+    chan->waiting_list = waiting_proc;
+  }
+  
+  m_out.ss_status = SS_SUCCESS;
+  return OK;
 }
 
 /**
@@ -185,45 +221,39 @@ int handle_pull() {
    * Set message data
    */
   CHANNEL *chan;
+  WPROC *waiting_proc;
   int copy_size;
   chan = get_channel(m_in.ss_name, channels);
   
   if (chan == NULL) {
     /* TODO: Set errno */
-    return SS_ERROR;
-  }
-  
-  if (chan->content == NULL) {
-    /* TODO: Set errno */
-    return SS_ERROR;
+    m_out.ss_status = SS_ERROR;
+    return OK;
   }
   
   /* Ensure puller is subscribed */
   if (!get_map(m_in.m_source, chan->subscribed)) {
     /* TODO: Set errno */
-    return SS_ERROR;
+    m_out.ss_status = SS_ERROR;
+    return OK;
   }
   
   /* Subscribers should only recieve each content once */
-  if (!get_map(m_in.m_source, chan->unreceived)) {
-    /* TODO: Set errno */
-    return SS_ERROR;
+  if (chan->content == NULL || !get_map(m_in.m_source, chan->unreceived)) {
+    /* Set bit in waiting */
+    chan->waiting = set_map(m_in.m_source, 1, chan->waiting);
+    /* Add struct to list */
+    waiting_proc = create_waiting(m_in.m_source, m_in.ss_pointer, m_in.ss_int);
+    waiting_proc->next = chan->waiting_list;
+    chan->waiting_list = waiting_proc;
+    
+    return SUSPEND;
   }
   
-  /* TODO: Write function */
-  /* Find size to copy */
-  if (chan->content_size > m_in.ss_int) {
-    copy_size = m_in.ss_int;
-  } else {
-    copy_size = chan->content_size;
-  }
+  copy_to_proc(m_in.m_source, m_in.ss_pointer, m_in.ss_int, chan);
   
-  /* Copy and set received */
-  sys_vircopy(SELF, D, chan->content, m_in.m_source, D, m_in.ss_pointer, copy_size);
-
-  chan->unreceived = set_map(m_in.m_source, 0, chan->unreceived);
-  
-  return SS_SUCCESS;
+  m_out.ss_status = SS_SUCCESS;
+  return OK;
 }
 
 /**
@@ -259,12 +289,14 @@ int handle_subscribe() {
     }
     
     m_out.ss_int = temp->min_buffer;
-    return SS_SUCCESS; 
+    m_out.ss_status = SS_SUCCESS; 
+    return OK;
 
   }
   else{
     /* the channel doesnt exist that you tried to subscribe to */
-    return SS_ERROR;
+    m_out.ss_status = SS_ERROR;
+    return OK;
   }     
 }
 
@@ -293,21 +325,24 @@ int handle_unsubscribe() {
      /* sets sub and unrec to 0 those removing it from the bitmap */
      temp->subscribed = set_map(sender, 0, temp->subscribed);
      temp->unreceived = set_map(sender, 0, temp->unreceived);
-     return SS_SUCCESS;
+     m_out.ss_status = SS_SUCCESS;
+     return OK;
     }
     else{
       /* its trying to unsubscribe from channel its not subed 2 */
-      return SS_ERROR;
+      m_out.ss_status = SS_ERROR;
+      return OK;
     }
   }
   else{
     /* there is no channel by that name */
-    return SS_ERROR;
+    m_out.ss_status = SS_ERROR;
+    return OK;
   }
 }
 
 
-int info(void){
+int handle_info(void){
   CHANNEL *currentC = channels;  
   
   if(currentC == NULL){
@@ -373,4 +408,20 @@ int get_map(int index, long current_map){
   
 }
 
+int copy_to_proc(int proc, void *pointer, int size, CHANNEL *chan) {
+  int copy_size;
+  /* Find size to copy */
+  if (chan->content_size > size) {
+    copy_size = size;
+  } else {
+    copy_size = chan->content_size;
+  }
+  
+  /* Copy and set received */
+  sys_vircopy(SELF, D, chan->content, proc, D, pointer, copy_size);
+
+  chan->unreceived = set_map(proc, 0, chan->unreceived);
+  
+  return 1;
+}
 

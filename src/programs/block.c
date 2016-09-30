@@ -15,11 +15,15 @@ int main(void) {
   
   subscribe(channel_name);
   
-  while (1) {
+  while (result < 5) {
     if (pull(channel_name, &result, 1))
-      printf("Message going though\n");
+      printf("Result: %d\n", result);
     else
       printf("Error in subserv\n");
     /*sleep(2);*/
   }
+  
+  printf("Block receiver shutting down\n");
+  unsubscribe(channel_name);
+  return 0;
 }

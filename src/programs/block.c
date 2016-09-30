@@ -8,14 +8,18 @@ char *channel_name = "blocker";
 
 int main(void) {
   int result = 0;
-  create_channel(channel_name, 1);
+  
+  printf("Block receiver sleeping to ensure channel is up\n");
+  sleep(2);
+  printf("Block receiver active\n");
+  
   subscribe(channel_name);
   
   while (1) {
     if (pull(channel_name, &result, 1))
-      printf("Subserve is not blocking\n");
+      printf("Message going though\n");
     else
       printf("Error in subserv\n");
-    sleep(2);
+    /*sleep(2);*/
   }
 }

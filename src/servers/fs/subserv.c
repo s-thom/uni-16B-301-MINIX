@@ -333,6 +333,8 @@ int bitsSetInLong(long l){
   int i = 0;
   long mask = 0x01;
 
+  printf("long is %ld", l);
+
   while(i < 64){
   
     if((l & mask) == 1){

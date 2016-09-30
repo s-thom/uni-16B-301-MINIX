@@ -146,6 +146,8 @@ int handle_push() {
    * Copy data to this
    */
   CHANNEL *chan;
+  WPROC *waiting_proc;
+  message *proc_reply;
   char ind;
   chan = get_channel(m_in.m3_ca1, channels);
   
@@ -177,7 +179,24 @@ int handle_push() {
   sys_vircopy(m_in.m_source, D, m_in.ss_pointer, SELF, D, chan->content, chan->content_size);  
   chan->unreceived = chan->subscribed;
   
-  /* TODO: clear all waiting procs */
+  /* Clear all waiting procs */
+  while (chan->waiting_list != NULL) {
+    waiting_proc = chan->waiting_list;
+    
+    /* Copy over */
+    copy_to_proc(waiting_proc->procnr, waiting_proc->content, waiting_proc->content_size, chan);
+    
+    /* Reply to process */
+    proc_reply = (message*) malloc(sizeof(message));
+    proc_reply->ss_status = SS_SUCCESS;
+    _send(waiting_proc->procnr, proc_reply);
+    
+    /* Free memory, set next one to go over */
+    free(proc_reply);
+    waiting_proc = waiting_proc->next;
+    free(chan->waiting_list);
+    chan->waiting_list = waiting_proc;
+  }
   
   m_out.ss_status = SS_SUCCESS;
   return OK;
@@ -218,8 +237,6 @@ int handle_pull() {
     waiting_proc = create_waiting(m_in.m_source, m_in.ss_pointer, m_in.ss_int);
     waiting_proc->next = chan->waiting_list;
     chan->waiting_list = waiting_proc;
-    
-    printf("process %d should now be blocked!\n", waiting_proc->procnr);
     
     return SUSPEND;
   }

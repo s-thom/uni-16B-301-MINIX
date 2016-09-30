@@ -84,6 +84,7 @@ OBJECTS	= \
 	$(LIBRARY)(strtok.o) \
 	$(LIBRARY)(strtol.o) \
 	$(LIBRARY)(strxfrm.o) \
+	$(LIBRARY)(subserv.o) \
 	$(LIBRARY)(system.o) \
 	$(LIBRARY)(tolower.o) \
 	$(LIBRARY)(toupper.o) \
@@ -310,6 +311,9 @@ $(LIBRARY)(strtol.o):	strtol.c
 
 $(LIBRARY)(strxfrm.o):	strxfrm.c
 	$(CC1) strxfrm.c
+
+$(LIBRARY)(subserv.o):	subserv.c
+	$(CC1) subserv.c
 
 $(LIBRARY)(system.o):	system.c
 	$(CC1) system.c

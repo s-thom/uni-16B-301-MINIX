@@ -70,8 +70,8 @@ CHANNEL *get_channel(char name[], CHANNEL *root){
   return NULL;
 }
 
-struct channel* create_channel(char *name, char oid, int size) {
-  struct channel *nc = (struct channel*) malloc(sizeof(struct channel));
+CHANNEL* create_channel(char *name, char oid, int size) {
+  CHANNEL *nc = (CHANNEL*) malloc(sizeof(CHANNEL));
   int i;
   
   /* Zero the entire string, including the explicit NULL terminator */
@@ -90,6 +90,15 @@ struct channel* create_channel(char *name, char oid, int size) {
   nc->next = NULL;
   
   return nc;
+}
+
+RCHAN* create_ratechannel(CHANNEL *channel) {
+  RCHAN *nr = (RCHAN*) malloc(sizeof(RCHAN));
+  
+  nr->channel = channel;
+  nr->next = NULL;
+  
+  return nr;
 }
 
 WPROC* create_waiting(int proc, void *p, int size) {

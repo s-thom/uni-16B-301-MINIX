@@ -66,13 +66,8 @@ PUBLIC int do_subserv() {
   }
   
   /* TODO: Send message back */
-<<<<<<< HEAD
   m_out.ss_status = retcode;
   return OK;
-=======
-  
-  return retcode;
->>>>>>> waiting
 }
 
 /**
@@ -187,6 +182,9 @@ int handle_push() {
   chan->content = malloc(chan->content_size);
   sys_vircopy(m_in.m_source, D, m_in.ss_pointer, SELF, D, chan->content, chan->content_size);  
   chan->unreceived = chan->subscribed;
+  
+  /* Rate "limiting" */
+  /* It's more like  */
   
   /* Clear all waiting procs */
   while (chan->waiting_list != NULL) {

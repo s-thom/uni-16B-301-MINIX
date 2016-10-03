@@ -25,10 +25,19 @@ struct channel {
   
   int content_size;
   int min_buffer;
+  /* Rate limiting */
+  long last_push;
+  float rate_weight;
   
   void *content;
   struct channel *next;
   struct wproc *waiting_list;
+};
+
+typedef struct rchan RCHAN;
+struct rchan {
+  CHANNEL *channel;
+  RCHAN *next;
 };
 
 /* A process that is waiting for a message */

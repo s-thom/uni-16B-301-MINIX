@@ -12,6 +12,11 @@
 #define ss_pointer m3_p1
 #define ss_int m3_i2
 
+typedef struct double_int DOUBLE_INT;
+struct double_int{
+  long lower;
+  long upper;
+};
 
 /* Holds information about a channel */
 typedef struct channel CHANNEL;
@@ -19,9 +24,9 @@ struct channel {
   char name[15];
   char oid;
   
-  long subscribed;
-  long unreceived;
-  long waiting;
+  DOUBLE_INT subscribed;
+  DOUBLE_INT unreceived;
+  DOUBLE_INT waiting;
   
   int content_size;
   int min_buffer;
@@ -51,9 +56,10 @@ int handle_pull(void);
 int handle_subscribe(void);
 int handle_unsubscribe(void);
 int handle_info(void);
-long set_map(int index, int boolean, long current_map);
-int get_map(int index, long current_map);
+u64_t set_map(int index, int boolean, u64_t current_map);
+int get_map(int index, DOUBLE_INT current_map);
 int copy_to_proc(int proc, void *pointer, int size, CHANNEL *chan);
+int bitsSetInLong(u64_t l);
 
 #endif
 

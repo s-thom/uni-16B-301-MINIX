@@ -1,6 +1,7 @@
 /* Holds the main function for the subscription server
  */
- 
+
+#include <stdint.h> 
 #include "fs.h"
 #include <minix/callnr.h>
 #include <minix/com.h>
@@ -58,7 +59,7 @@ PUBLIC int do_subserv() {
       break;
     /* INFO */
     case 6:
-      retcode = info();
+      retcode = handle_info();
       break;
     default:
       m_out.ss_status = SS_ERROR;
@@ -66,13 +67,9 @@ PUBLIC int do_subserv() {
   }
   
   /* TODO: Send message back */
-<<<<<<< HEAD
+
   m_out.ss_status = retcode;
   return OK;
-=======
-  
-  return retcode;
->>>>>>> waiting
 }
 
 /**
@@ -363,12 +360,12 @@ int handle_info(void){
 }
 
 /* checks how many bits are set in a bit map */
-int bitsSetInLong(long l){
+int bitsSetInLong(DOUBLE_INT l){
   int count = 0;
   int i = 0;
-  long mask = 0x01;
+  DOUBLE_INT mask = 0x01;
 
-  printf("long is %ld", l);
+  /* printf("long is %ld", l); */
 
   while(i < 64){
   
@@ -382,9 +379,9 @@ int bitsSetInLong(long l){
 }
 
 /* uses the index to find the bit you want to change, sets the bit to the bool value 0 or 1 and then returns */
-long set_map(int index, int boolean, long current_map){
+DOUBLE_INT set_map(int index, int boolean, DOUBLE_INT current_map){
   
-  long mask;  
+  DOUBLE_INT mask;  
   
   mask = 0x01;
   mask = mask << index;
@@ -398,7 +395,7 @@ long set_map(int index, int boolean, long current_map){
   }
 }
 
-int get_map(int index, long current_map){
+int get_map(int index, DOUBLE_INT current_map){
   long mask;
 
   mask = 0x01;

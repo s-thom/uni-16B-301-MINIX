@@ -15,6 +15,7 @@ int contains_channel(char name[], CHANNEL *root){
   return 0;
 }
 
+
 /* removes string at a given index */
 CHANNEL *remove_channel(char name[], CHANNEL *root){
   
@@ -82,8 +83,10 @@ struct channel* create_channel(char *name, char oid, int size) {
   nc->name[14] = 0;
   
   nc->oid = oid;
-  nc->subscribed = 0;
-  nc->unreceived = 0;
+  nc->subscribed.lower = 0;
+  nc->subscribed.upper = 0;
+  nc->unreceived.lower = 0;
+  nc->unreceived.upper = 0;
   nc->content = NULL;
   nc->content_size = 0;
   nc->min_buffer = size;

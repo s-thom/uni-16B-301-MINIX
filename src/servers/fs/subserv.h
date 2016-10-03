@@ -4,6 +4,9 @@
 #ifndef SUBSERV
 #define SUBSERV
 
+#include <time.h>
+#include <signal.h>
+
 #define SS_ERROR 0
 #define SS_SUCCESS 1
 
@@ -26,8 +29,8 @@ struct channel {
   int content_size;
   int min_buffer;
   /* Rate limiting */
-  long last_push;
-  float rate_weight;
+  time_t last_push;
+  int rate_weight;
   
   void *content;
   struct channel *next;
@@ -36,6 +39,7 @@ struct channel {
 
 typedef struct rchan RCHAN;
 struct rchan {
+  int time_remaining;
   CHANNEL *channel;
   RCHAN *next;
 };

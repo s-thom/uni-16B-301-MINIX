@@ -13,6 +13,7 @@
 #include <stdio.h>
 
 CHANNEL *channels = NULL;
+RCHAN *blocked_channels = NULL;
 
 PUBLIC int do_subserv() {
   /* TODO: check message status code, act accordingly */
@@ -150,9 +151,9 @@ int handle_push() {
    * Copy data to this
    */
   CHANNEL *chan;
-  WPROC *waiting_proc;
-  message *proc_reply;
   char ind;
+  int time_diff;
+  long curr_time;
   chan = get_channel(m_in.m3_ca1, channels);
   
   /* Error checking */
@@ -184,7 +185,35 @@ int handle_push() {
   chan->unreceived = chan->subscribed;
   
   /* Rate "limiting" */
-  /* It's more like  */
+  /*  */
+  time(&curr_time); /* Get the current time */
+  time_diff = curr_time - chan->last_push;
+  time_diff--;
+  
+  if (chan->rate_weight - time_diff > 0) {
+    (chan->rate_weight -= time_diff;
+  } else {
+    chan->rate_weight = 0;
+  }
+  
+  chan->last_push = curr_time;
+  
+  if (chan->rate_weight > 5) {
+    /* Block channel! */
+    
+    return SUSPEND;
+  }
+  
+  clear_waiting(chan);
+  
+  m_out.ss_status = SS_SUCCESS;
+  return OK;
+}
+  
+
+void clear_waiting(CHANNEL *chan) {
+  WPROC *waiting_proc;
+  message *proc_reply;
   
   /* Clear all waiting procs */
   while (chan->waiting_list != NULL) {
@@ -204,9 +233,6 @@ int handle_push() {
     free(chan->waiting_list);
     chan->waiting_list = waiting_proc;
   }
-  
-  m_out.ss_status = SS_SUCCESS;
-  return OK;
 }
 
 /**

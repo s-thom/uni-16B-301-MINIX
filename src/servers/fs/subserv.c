@@ -66,13 +66,8 @@ PUBLIC int do_subserv() {
   }
   
   /* TODO: Send message back */
-<<<<<<< HEAD
   m_out.ss_status = retcode;
   return OK;
-=======
-  
-  return retcode;
->>>>>>> waiting
 }
 
 /**
@@ -156,9 +151,13 @@ int handle_push() {
    */
   CHANNEL *chan;
   WPROC *waiting_proc;
+  WPROC *unrecieved_proc;
+  WPROC *temp_proc;
   message *proc_reply;
   char ind;
   chan = get_channel(m_in.m3_ca1, channels);
+  /* set the unrecieved_proc to the unrecieved List */
+  unrecieved_proc = chan->unrecieved_list;
   
   /* Error checking */
   /* Check channel actually exists */
@@ -195,16 +194,17 @@ int handle_push() {
     /* Copy over */
     copy_to_proc(waiting_proc->procnr, waiting_proc->content, waiting_proc->content_size, chan);
     
-    /* Reply to process */
+    /* Reply to process (unblocking) */
     proc_reply = (message*) malloc(sizeof(message));
     proc_reply->ss_status = SS_SUCCESS;
     _send(waiting_proc->procnr, proc_reply);
-    
-    /* Free memory, set next one to go over */
-    free(proc_reply);
-    waiting_proc = waiting_proc->next;
-    free(chan->waiting_list);
-    chan->waiting_list = waiting_proc;
+    free(proc_reply);    
+
+    /* Move to unrecived */
+    temp_proc = waiting_proc->next;
+    waiting_proc->next = unrecieved_proc;
+    unrecieved_proc = waiting_proc;
+    waiting_proc = temp_proc;
   }
   
   m_out.ss_status = SS_SUCCESS;
@@ -256,6 +256,18 @@ int handle_pull() {
   return OK;
 }
 
+WPROC *create_wproc(int procnr, int content_size, void *content){
+  WPROC *node = malloc(sizeof(WPROC));  
+  
+  node->procnr = procnr;
+  node->content_size = content_size;
+  node->content = *content;
+  node->next = NULL;
+
+  return node;
+}
+
+
 /**
  * Handles subscribing to a channel 
  */
@@ -265,30 +277,26 @@ int handle_subscribe() {
    * Add proc to subscribers
    * Send back
    */
-  CHANNEL *temp;
+  CHANNEL *chan;
   int sender;
   /* TODO: Check for erroneous message */
   /* TODO: Write function */
 
   temp = get_channel(m_in.ss_name, channels);
   sender = m_in.m_source;
+  WPROC new;
 
   /* checks to insure the channel exists */
-  if(temp != NULL){
+  if(chan != NULL){
     /* m_out.ss_int = temp->min_buffer */
     /* checks to see if already subscribed */
 
-    if(get_map(sender, temp->subscribed)){
-      /* its already in the bitmap as subscribed */
-      
-    }
-    else{
-      /* not already in the bitmap */
-      temp->subscribed = set_map(sender, 1, temp->subscribed);
-      temp->unreceived = set_map(sender, 1, temp->unreceived);
-    }
-    
-    m_out.ss_int = temp->min_buffer;
+    /* add to the unrecieved list */
+    new = create_wproc(sender, m_in.ss_int, m_in.ss_pointer);
+    new->next = chan->unrecieved_list;
+    chan->unrecieved_list = new;
+
+    m_out.ss_int = chan->min_buffer;
     m_out.ss_status = SS_SUCCESS; 
     return OK;
 

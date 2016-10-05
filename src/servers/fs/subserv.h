@@ -56,10 +56,10 @@ int handle_pull(void);
 int handle_subscribe(void);
 int handle_unsubscribe(void);
 int handle_info(void);
-u64_t set_map(int index, int boolean, u64_t current_map);
+DOUBLE_INT set_map(int index, int boolean, DOUBLE_INT current_map);
 int get_map(int index, DOUBLE_INT current_map);
 int copy_to_proc(int proc, void *pointer, int size, CHANNEL *chan);
-int bitsSetInLong(u64_t l);
+int bitsSetInLong(DOUBLE_INT l);
 
 #endif
 

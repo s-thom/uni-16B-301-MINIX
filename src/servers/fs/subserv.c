@@ -58,7 +58,7 @@ PUBLIC int do_subserv() {
       break;
     /* INFO */
     case 6:
-      retcode = info();
+      retcode = handle_info();
       break;
     default:
       m_out.ss_status = SS_ERROR;
@@ -66,13 +66,8 @@ PUBLIC int do_subserv() {
   }
   
   /* TODO: Send message back */
-<<<<<<< HEAD
   m_out.ss_status = retcode;
   return OK;
-=======
-  
-  return retcode;
->>>>>>> waiting
 }
 
 /**

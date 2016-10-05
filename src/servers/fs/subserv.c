@@ -150,8 +150,7 @@ int handle_push() {
    * Copy data to this
    */
   CHANNEL *chan;
-  WPROC *waiting_proc;
-  WPROC *unrecieved_proc;
+
   WPROC *temp_proc;
   message *proc_reply;
   char ind;
@@ -187,6 +186,10 @@ int handle_push() {
   sys_vircopy(m_in.m_source, D, m_in.ss_pointer, SELF, D, chan->content, chan->content_size);  
   chan->unreceived = chan->subscribed;
   
+  /* shift everything in recieved to unrecieved */
+  chan->unrecieved = list_copy(chan->unrecieved, chan->recieved);
+  chan->recieved = NULL;
+  
   /* Clear all waiting procs */
   while (chan->waiting_list != NULL) {
     waiting_proc = chan->waiting_list;
@@ -201,12 +204,12 @@ int handle_push() {
     free(proc_reply);    
 
     /* Move to unrecived */
-    temp_proc = waiting_proc->next;
-    waiting_proc->next = unrecieved_proc;
-    unrecieved_proc = waiting_proc;
+    temp_proc = chan->waiting_list->next;
+    waiting_proc->next = chan->unrecieved_list;
+    chan->recieved_list = chan->waiting_list;
     waiting_proc = temp_proc;
   }
-  
+
   m_out.ss_status = SS_SUCCESS;
   return OK;
 }

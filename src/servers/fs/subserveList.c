@@ -186,6 +186,20 @@ WPROC *wproc_seprate_out(int procn, WPROC *root){
   return root;
 }
 
+/* after this call from must be set to NULL!! */
+WPROC *wproc list_copy(WPROC *to, WPROC *from){
+  WPROC *temp = NULL;  
+
+  while(from != NULL){
+    /* copy to to */
+    temp = from;
+    from = from->next;
+    temp->next = to;
+    to = temp;
+  }
+  return to;
+}
+
 
 
 

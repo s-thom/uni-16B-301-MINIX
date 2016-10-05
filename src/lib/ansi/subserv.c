@@ -79,7 +79,7 @@ int pull(char name[], void*data, size_t size){
 	op = m->m3_i1;
 	free(m);
 
-	return op;
+	return m->m3_i2;
 }
 
 /* subscribe sets it up so that the server knows you are intrested in this channel and also tells it to hold the most recent data value of this channel until

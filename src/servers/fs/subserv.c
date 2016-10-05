@@ -363,16 +363,27 @@ int handle_info(void){
 int bitsSetInLong(DOUBLE_INT l){
   int count = 0;
   int i = 0;
-  DOUBLE_INT mask = 0x01;
+  long mask = 0x01;
+  long val;
 
   /* printf("long is %ld", l); */
-
-  while(i < 64){
   
-    if((l & mask) == 1){
+  val = current_map->lower;
+  while(i < 32){
+  
+    if((val & mask) == 1){
       count++;
     }
-    l = l>>1;  
+    val = val>>1;  
+    i++;
+  }
+  val = current_map->upper;
+  while(i < 32){
+  
+    if((val & mask) == 1){
+      count++;
+    }
+    val = val>>1;  
     i++;
   }
   return count;
@@ -380,29 +391,43 @@ int bitsSetInLong(DOUBLE_INT l){
 
 /* uses the index to find the bit you want to change, sets the bit to the bool value 0 or 1 and then returns */
 DOUBLE_INT set_map(int index, int boolean, DOUBLE_INT current_map){
+  long mask;  
+  long val;
   
-  DOUBLE_INT mask;  
+  if (index < 32) {
+    val = current_map->lower;
+  } else {
+    val = current_map->upper;
+  }
   
   mask = 0x01;
   mask = mask << index;
   
   if(boolean){
-    return current_map | mask;
+    return val | mask;
   }
   else{
     mask = ~ mask;
-    return current_map & mask;
+    return val & mask;
   }
 }
 
-int get_map(int index, DOUBLE_INT current_map){
+int get_map(int index, DOUBLE_INT *current_map){
   long mask;
+  long val;
+  
+  if (index < 32) {
+    val = current_map->lower;
+  } else {
+    val = current_map->upper;
+  }
 
   mask = 0x01;
   mask = mask << index - 1;
   mask = ~ mask;
-  current_map = current_map & mask;
-  current_map = current_map >> index;
+  
+  val = val & mask;
+  val = val >> index;
   return (int) current_map;
   
 }

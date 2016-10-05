@@ -12,6 +12,7 @@
 #define ss_pointer m3_p1
 #define ss_int m3_i2
 
+/* A small misnomer. Holds 2 32 bit numbers */
 typedef struct double_int DOUBLE_INT;
 struct double_int{
   long lower;

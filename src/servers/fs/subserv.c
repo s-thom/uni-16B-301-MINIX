@@ -243,7 +243,10 @@ int handle_pull() {
   /* Subscribers should only recieve each content once */
   if (chan->content == NULL || !get_map(m_in.m_source, chan->unreceived)) {
     /* move out of reviece and into waiting */
-    toShift = get_subscriber(, from);
+    toShift = get_subscriber(sender, unrecieved_list);
+    chan->unrecieved_list = wproc_seprate_out(sender, unrecieved_list);
+    toShift->next = chan->waiting_list;
+    chan->waiting_list = toShift;  
     
     return SUSPEND;
   }

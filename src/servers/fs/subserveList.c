@@ -102,6 +102,10 @@ struct channel* create_channel(char *name, char oid, int size) {
   nc->content_size = 0;
   nc->min_buffer = size;
   nc->next = NULL;
+
+  nc->unrecieved_list = NULL;
+  nc->recieved_list = NULL;
+  nc->waiting_list = NULL;
   
   return nc;
 }

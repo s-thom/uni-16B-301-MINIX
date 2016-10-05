@@ -28,8 +28,10 @@ struct channel {
   
   void *content;
   struct channel *next;
+  
   struct wproc *waiting_list;
   struct wproc *unrecieved_list;
+  struct wproc *recieved_list;
 };
 
 /* A process that is waiting for a message */

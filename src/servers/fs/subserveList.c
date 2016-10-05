@@ -15,6 +15,12 @@ int contains_channel(char name[], CHANNEL *root){
   return 0;
 }
 
+/* moves a WPROC from one list to another */
+WPROC *wproc_shift(int procn, WPROC *from, WPROC *to){
+  WPROC *toMove = *get_subscriber(procn, from);
+  
+}
+
 /* removes string at a given index */
 CHANNEL *remove_channel(char name[], CHANNEL *root){
   
@@ -33,7 +39,10 @@ CHANNEL *remove_channel(char name[], CHANNEL *root){
           /* frees stored date seg */          
           free(temp->content);
         }
-        
+        /* free other link lists */
+        destroy_list(temp->unrecieved_list);
+        destroy_list(temp->waiting_list);
+
         free(temp);
         return placeHolder;
       }
@@ -41,6 +50,11 @@ CHANNEL *remove_channel(char name[], CHANNEL *root){
         /* its not the root being remove */
         placeHolder = temp;
         prev->next = temp->next;
+
+        /* free other link lists */
+        destroy_list(temp->unrecieved_list);
+        destroy_list(temp->waiting_list);        
+
         free(temp);
         return root;
       }
@@ -92,7 +106,7 @@ struct channel* create_channel(char *name, char oid, int size) {
   return nc;
 }
 
-WPROC* create_waiting(int proc, void *p, int size) {
+WPROC *create_waiting(int proc, void *p, int size) {
   WPROC *np = (WPROC*) malloc(sizeof(WPROC));
   
   np->procnr = proc;
@@ -102,3 +116,72 @@ WPROC* create_waiting(int proc, void *p, int size) {
   
   return np;
 }
+
+WPROC *get_subscriber(int procn, WPROC *root){
+  
+  while(root != NULL){
+    
+    if(root->procnr == procn){
+      return root;
+    }
+    root = root->next;
+  }
+  return NULL;
+}
+
+WPROC *remove_from_wproc(int procn, WPROC *root){
+  WPROC *prev = NULL;
+  WPROC *current = root;
+  WPROc *result = root;
+  
+  while(current != NULL){
+    
+    if(procn == current->procnr){
+      if(prev != NULL){
+        /* cut out the current node */
+        prev->next = current->next;
+      }
+      else{
+        /* return the new root to be the next */
+        result = current->next;
+      }
+      free(current);
+      return result;
+    }
+    prev = current;
+    current = current->next; 
+  }
+  return root;
+}
+
+void *destroy_list(WPROC *root){
+  WPROC *next = NULL;    
+
+  while(root != NULL){
+    next = root->next;
+    free(root);
+    root = next;       
+  }
+}
+
+WPROC *wproc_seprate_out(int procn, WPROC *root){
+  WPROC *current = root;
+  WPROC *Prev = NULL;  
+
+  while(current != NULL){
+    if(procn == current->procnr){
+      if(prev == NULL){
+        root = current->next;
+      }
+      else{
+        prev->next = current->next;
+      }
+    }
+  }
+  return root;
+}
+
+
+
+
+

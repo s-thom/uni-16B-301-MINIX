@@ -221,8 +221,10 @@ int handle_pull() {
    * Set message data
    */
   CHANNEL *chan;
-  WPROC *waiting_proc;
   int copy_size;
+  int sender = m_in.m_source;
+  WPROC *toShift = NULL;  
+
   chan = get_channel(m_in.ss_name, channels);
   
   if (chan == NULL) {
@@ -240,12 +242,8 @@ int handle_pull() {
   
   /* Subscribers should only recieve each content once */
   if (chan->content == NULL || !get_map(m_in.m_source, chan->unreceived)) {
-    /* Set bit in waiting */
-    chan->waiting = set_map(m_in.m_source, 1, chan->waiting);
-    /* Add struct to list */
-    waiting_proc = create_waiting(m_in.m_source, m_in.ss_pointer, m_in.ss_int);
-    waiting_proc->next = chan->waiting_list;
-    chan->waiting_list = waiting_proc;
+    /* move out of reviece and into waiting */
+    toShift = get_subscriber(, from);
     
     return SUSPEND;
   }
@@ -290,7 +288,12 @@ int handle_subscribe() {
   if(chan != NULL){
     /* m_out.ss_int = temp->min_buffer */
     /* checks to see if already subscribed */
-
+    if(get_subscriber(sender, chan->unrecieved_list) || get_subscriber(sender, chan->waiting_list)){
+      /* the channel is already subscribed */
+      m_out.ss_status = SS_SUCCESS;
+      return OK;
+    }
+    
     /* add to the unrecieved list */
     new = create_wproc(sender, m_in.ss_int, m_in.ss_pointer);
     new->next = chan->unrecieved_list;
@@ -317,22 +320,23 @@ int handle_unsubscribe() {
    * Remove proc from subscribers
    * Send back
    */
-  CHANNEL *temp;
+  CHANNEL *chan;
   int sender;
   /* TODO: Check for erroneous message */
   /* TODO: Write function */
   /* m_in */
 
-  temp = get_channel(m_in.ss_name, channels);
+  chan = get_channel(m_in.ss_name, channels);
   sender = m_in.m_source;  
   
   /* checks to see if that channel is in the list */
-  if(temp != NULL){
+  if(chan != NULL){
     
-    if(get_map(sender, temp->subscribed)){
-     /* sets sub and unrec to 0 those removing it from the bitmap */
-     temp->subscribed = set_map(sender, 0, temp->subscribed);
-     temp->unreceived = set_map(sender, 0, temp->unreceived);
+    if(get_subscriber(sender, chan->unrecieved_list) || get_subscriber(sender, chan->waiting_list)){
+     /* if they are in either list then remove them from the list */
+     chan->unrecieved_list = remove_from_wproc(sender, chan->unrecieved_list);
+     chan->waiting_list = remove_from_wproc(sender, chan->waiting_list);
+      
      m_out.ss_status = SS_SUCCESS;
      return OK;
     }

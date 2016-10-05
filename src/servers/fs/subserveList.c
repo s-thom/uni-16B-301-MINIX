@@ -42,6 +42,7 @@ CHANNEL *remove_channel(char name[], CHANNEL *root){
         /* free other link lists */
         destroy_list(temp->unrecieved_list);
         destroy_list(temp->waiting_list);
+        destroy_list(temp->revieved_list);
 
         free(temp);
         return placeHolder;

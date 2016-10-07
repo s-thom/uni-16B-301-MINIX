@@ -362,7 +362,11 @@ int handle_unsubscribe() {
 
 
 int handle_info(void){
-  CHANNEL *currentC = channels;  
+  CHANNEL *currentC = channels;
+
+  int waiting = 0;
+  int unreceived = 0;
+  int received = 0;  
   
   if(currentC == NULL){
     printf("There are currently no channels :(");
@@ -371,7 +375,11 @@ int handle_info(void){
     printf("--------------------------------------------------------------------------------\n");
     while(currentC != NULL){
       
-      printf("%s : %d/%d\n", currentC->name, bitsSetInLong(currentC->unreceived), bitsSetInLong(currentC->subscribed));
+      waiting = wproc_list_length(currentC->waiting_list);
+      unreceived = wproc_list_length(currentC->unrecieved_list);
+      received = wproc_list_length(currentC->recieved_list);
+
+      printf("%s : %d/%d\n", currentC->name, waiting + unreceived, waiting + unreceived + received);
       currentC = currentC->next;
     }
     
@@ -379,54 +387,6 @@ int handle_info(void){
   }
   m_out.ss_status = SS_SUCCESS;
   return OK;
-}
-
-/* checks how many bits are set in a bit map */
-int bitsSetInLong(long l){
-  int count = 0;
-  int i = 0;
-  long mask = 0x01;
-
-  printf("long is %ld", l);
-
-  while(i < 64){
-  
-    if((l & mask) == 1){
-      count++;
-    }
-    l = l>>1;  
-    i++;
-  }
-  return count;
-}
-
-/* uses the index to find the bit you want to change, sets the bit to the bool value 0 or 1 and then returns */
-long set_map(int index, int boolean, long current_map){
-  
-  long mask;  
-  
-  mask = 0x01;
-  mask = mask << index;
-  
-  if(boolean){
-    return current_map | mask;
-  }
-  else{
-    mask = ~ mask;
-    return current_map & mask;
-  }
-}
-
-int get_map(int index, long current_map){
-  long mask;
-
-  mask = 0x01;
-  mask = mask << index - 1;
-  mask = ~ mask;
-  current_map = current_map & mask;
-  current_map = current_map >> index;
-  return (int) current_map;
-  
 }
 
 int copy_to_proc(int proc, void *pointer, int size, CHANNEL *chan) {

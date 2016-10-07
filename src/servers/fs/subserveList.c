@@ -200,7 +200,15 @@ WPROC *wproc list_copy(WPROC *to, WPROC *from){
   return to;
 }
 
+int wproc_list_length(WPROC *root){
+  int count = 0;
+  
+  while(root != NULL){
+    count++;
+    root = root->next;
+  }
 
-
+  return count;
+}
 
 

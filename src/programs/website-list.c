@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <signal.h>
 #include <minix/subserve.h>
 #include <unistd.h>
 #include <string.h>
@@ -10,6 +9,7 @@ int server(void);
 int client(void);
 
 char *channel_name = "website!";
+int timer = 10; /* Number of iterations to run */
 
 int main(void){
   pid_t proc;
@@ -18,11 +18,11 @@ int main(void){
 	
 	if (create_channel(channel_name, 128)) { /* Limit URLs to 128 characters */
     printf("[s] Couldn't create channel\n");
+    timer = 0;
 	  return 1;
 	}
 
 	if (proc = fork()) {
-	  printf("client process ID: proc\n");
 	  server();
 	} else {
 	  client();
@@ -39,13 +39,18 @@ int server(void) {
     "https://stackoverflow.com",
     "https://xkcd.com/303",
     "http://paul.pm/301",
-    "http://example.com/"    
+    "http://example.com"   
   };
   int num_sites = 8; /* Hopefully using a power of 2 will prevent most mod biases */
   int index;
 
   
   while (1) {
+    if (!timer) {
+      printf("[s] Shutting down\n");
+      return 0;
+    }
+  
     index = rand() % num_sites;
     
     printf("[s] About to push\n");
@@ -62,6 +67,11 @@ int client(void) {
   char *storage;
   
   while (! (buff_size = subscribe(channel_name))) {
+    if (!timer) {
+      printf("[c] Shutting down\n");
+      return 0;
+    }
+    
     printf("[c] Sleeping for 1s to wait for server");
     sleep(1);
   }
@@ -70,6 +80,11 @@ int client(void) {
   storage = (char *) malloc(buff_size);
   
   while (1) {
+    if (!timer) {
+      printf("[s] Shutting down\n");
+      return 0;
+    }
+    
     pull_size = pull(channel_name, storage, buff_size);
     
     if (pull_size == 0) {
@@ -77,8 +92,9 @@ int client(void) {
       return 1;
     }
     
-    storage[pull_size] = '\0'; /* Explicit terminator */
-    printf("[c] %s\n", storage);
+    storage[pull_size] = '\0'; /* Explicit terminator, just in case */
+    printf("[c] %s (%d)\n", storage, pull_size);
+    sleep(1);
   }
 }
 

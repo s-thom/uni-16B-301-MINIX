@@ -342,6 +342,7 @@ int handle_unsubscribe() {
      /* if they are in either list then remove them from the list */
      chan->unrecieved_list = remove_from_wproc(sender, chan->unrecieved_list);
      chan->waiting_list = remove_from_wproc(sender, chan->waiting_list);
+     chan->recieved_list = remove_from_wproc(sender, chan->recieved_list);
       
      m_out.ss_status = SS_SUCCESS;
      return OK;

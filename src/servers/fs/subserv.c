@@ -187,11 +187,12 @@ int handle_push() {
   while (chan->waiting_list != NULL) {
     waiting_proc = chan->waiting_list;
     
-    /* Copy over */
-    copy_to_proc(waiting_proc->procnr, waiting_proc->content, waiting_proc->content_size, chan);
-    
     /* Reply to process */
     proc_reply = (message*) malloc(sizeof(message));
+    
+    /* Copy over */
+    proc_reply->ss_int = copy_to_proc(waiting_proc->procnr, waiting_proc->content, waiting_proc->content_size, chan);
+    
     proc_reply->ss_status = SS_SUCCESS;
     _send(waiting_proc->procnr, proc_reply);
     
@@ -245,7 +246,7 @@ int handle_pull() {
     return SUSPEND;
   }
   
-  copy_to_proc(m_in.m_source, m_in.ss_pointer, m_in.ss_int, chan);
+  m_out.ss_int = copy_to_proc(m_in.m_source, m_in.ss_pointer, m_in.ss_int, chan);
   
   m_out.ss_status = SS_SUCCESS;
   return OK;
@@ -341,7 +342,7 @@ int handle_info(void){
   CHANNEL *currentC = channels;  
   
   if(currentC == NULL){
-    printf("There are currently no channels :(");
+    printf("There are currently no channels :(\n");
   }
   else{
     printf("--------------------------------------------------------------------------------\n");
@@ -362,8 +363,6 @@ int bitsSetInLong(long l){
   int count = 0;
   int i = 0;
   long mask = 0x01;
-
-  printf("long is %ld", l);
 
   while(i < 64){
   
@@ -419,6 +418,6 @@ int copy_to_proc(int proc, void *pointer, int size, CHANNEL *chan) {
 
   chan->unreceived = set_map(proc, 0, chan->unreceived);
   
-  return 1;
+  return copy_size;
 }
 

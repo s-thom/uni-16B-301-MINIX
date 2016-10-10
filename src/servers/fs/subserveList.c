@@ -3,6 +3,33 @@
 #include <stdlib.h>
 #include <string.h>
 
+WPROC *get_subscriber(int procn, WPROC *root){
+  
+  while(root != NULL){
+    
+    if(root->procnr == procn){
+      return root;
+    }
+    root = root->next;
+  }
+  return NULL;
+}
+
+/* moves a WPROC from one list to another */
+WPROC *wproc_shift(int procn, WPROC *from, WPROC *to){
+  WPROC *toMove = get_subscriber(procn, from);
+}
+
+void *destroy_list(WPROC *root){
+  WPROC *next = NULL;    
+
+  while(root != NULL){
+    next = root->next;
+    free(root);
+    root = next;       
+  }
+}
+
 /* checks if the channel is already in the list and if it is return 1 */
 int contains_channel(char name[], CHANNEL *root){
   
@@ -13,12 +40,6 @@ int contains_channel(char name[], CHANNEL *root){
     root = root->next;
   }
   return 0;
-}
-
-/* moves a WPROC from one list to another */
-WPROC *wproc_shift(int procn, WPROC *from, WPROC *to){
-  WPROC *toMove = *get_subscriber(procn, from);
-  
 }
 
 /* removes string at a given index */
@@ -42,7 +63,7 @@ CHANNEL *remove_channel(char name[], CHANNEL *root){
         /* free other link lists */
         destroy_list(temp->unrecieved_list);
         destroy_list(temp->waiting_list);
-        destroy_list(temp->revieved_list);
+        destroy_list(temp->recieved_list);
 
         free(temp);
         return placeHolder;
@@ -122,22 +143,10 @@ WPROC *create_waiting(int proc, void *p, int size) {
   return np;
 }
 
-WPROC *get_subscriber(int procn, WPROC *root){
-  
-  while(root != NULL){
-    
-    if(root->procnr == procn){
-      return root;
-    }
-    root = root->next;
-  }
-  return NULL;
-}
-
 WPROC *remove_from_wproc(int procn, WPROC *root){
   WPROC *prev = NULL;
   WPROC *current = root;
-  WPROc *result = root;
+  WPROC *result = root;
   
   while(current != NULL){
     
@@ -159,19 +168,9 @@ WPROC *remove_from_wproc(int procn, WPROC *root){
   return root;
 }
 
-void *destroy_list(WPROC *root){
-  WPROC *next = NULL;    
-
-  while(root != NULL){
-    next = root->next;
-    free(root);
-    root = next;       
-  }
-}
-
 WPROC *wproc_seprate_out(int procn, WPROC *root){
   WPROC *current = root;
-  WPROC *Prev = NULL;  
+  WPROC *prev = NULL;  
 
   while(current != NULL){
     if(procn == current->procnr){
@@ -182,22 +181,43 @@ WPROC *wproc_seprate_out(int procn, WPROC *root){
         prev->next = current->next;
       }
     }
+
+    printf("loop v\n");
+    prev = current;
+    current = current->next;
+    
+    printf("current proc = %d next = %d\n", current->procnr, current->next->procnr);
+    /*
+    printf("length of new current: %d\n", wproc_list_length(current));
+    printf("loop u\n");
+    */
   }
   return root;
 }
 
 /* after this call from must be set to NULL!! */
-WPROC *wproc list_copy(WPROC *to, WPROC *from){
+WPROC *list_copy(WPROC *to, WPROC *from){
+  
   WPROC *temp = NULL;  
-
-  while(from != NULL){
-    /* copy to to */
-    temp = from;
-    from = from->next;
-    temp->next = to;
-    to = temp;
+  WPROC *current = to;
+  
+  /* if the list is null return the from list */
+  if(to == NULL){
+    printf("[sl] copy to is empty");
+    return from;
   }
+  /* if the from list is null return the to list */
+  if(from == NULL){
+    return to;
+  }
+
+  while(current->next != NULL){
+    current = current->next;
+  }
+
+  current->next = from;
   return to;
+  
 }
 
 int wproc_list_length(WPROC *root){
@@ -209,6 +229,41 @@ int wproc_list_length(WPROC *root){
   }
 
   return count;
+}
+
+int loop_check(CHANNEL *chan, char out[]){
+  WPROC *root = NULL;  
+  
+  root = chan->unrecieved_list;
+  while(root != NULL){
+    if(root->procnr == root->next->procnr){
+      printf("infinite loop found at : %s in unrec\n", out);
+      return 1;
+    }      
+    root = root->next;  
+  }
+
+  root = chan->recieved_list;
+  while(root != NULL){
+    if(root->procnr == root->next->procnr){
+      printf("infinite loop found at : %s in rec\n", out);
+      return 1;
+    }      
+    root = root->next;  
+  }
+
+  root = chan->waiting_list;
+  while(root != NULL){
+    if(root->procnr == root->next->procnr){
+      printf("infinite loop found at : %s in wait\n", out);
+      return 1;
+    }      
+    root = root->next;  
+  }
+
+
+  
+  return 0;
 }
 
 

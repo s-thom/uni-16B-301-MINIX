@@ -1,4 +1,5 @@
 #include <minix/subserve.h>
+#include <stdio.h>
 
 /* a user proccess calls create_channel when it has something it wants to send to multiple other user proccess
 a channel is then created which the proccess can then input data into like a stream
@@ -11,9 +12,10 @@ int create_channel(char name[], int size){
 	m->m_type = SUBNUMBER;
 	m->m3_i1 = CREATECHANNEL;
 	m->m3_i2 = size;
-	strcpy(m->m3_ca1, name);
-
+	strncpy(m->m3_ca1, name, 14);
+  printf("[lib] about to send\n");
 	_sendrec(FS, m);
+  printf("[lib] got reply, status: %d\n", m->m3_i1);
 	op = m->m3_i1;
 	free(m);
 
@@ -31,7 +33,7 @@ int close_channel(char name[]){
 	message *m = (message*) malloc(sizeof(message));
 	m->m_type = SUBNUMBER;
 	m->m3_i1 = CLOSECHANNEL;
-	strcpy(m->m3_ca1, name);
+	strncpy(m->m3_ca1, name, 14);
 
 	_sendrec(FS, m);
 	
@@ -49,7 +51,7 @@ int push(char name[], void* data, size_t size){
 	message *m = (message*) malloc(sizeof(message));
 	m->m_type = SUBNUMBER;
 	m->m3_i1 = PUSHC;
-	strcpy(m->m3_ca1, name);
+	strncpy(m->m3_ca1, name, 14);
 	m->m3_p1 = (char*) data;
 	m->m3_i2 = size;
 
@@ -70,7 +72,7 @@ int pull(char name[], void*data, size_t size){
 	message *m = (message*) malloc(sizeof(message));
 	m->m_type = SUBNUMBER;
 	m->m3_i1 = PULLC;
-	strcpy(m->m3_ca1, name);
+	strncpy(m->m3_ca1, name, 14);
 	m->m3_p1 = (char*) data;
 	m->m3_i2 = size;
 		
@@ -107,7 +109,7 @@ int unsubscribe(char name[]){
 	message *m = (message*) malloc(sizeof(message));
 	m->m_type = SUBNUMBER;
 	m->m3_i1 = UNSUBC;
-	strcpy(m->m3_ca1, name);
+	strncpy(m->m3_ca1, name, 14);
 
 	_sendrec(FS, m);
 	op = m->m3_i1;

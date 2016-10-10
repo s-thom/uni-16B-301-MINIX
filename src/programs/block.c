@@ -14,9 +14,10 @@ int main(void) {
   printf("Block receiver active\n");
   
   subscribe(channel_name);
+  printf("Block receiver subscribed\n");
   
   while (result < 5) {
-    if (pull(channel_name, &result, 1))
+    if (pull(channel_name, &result, sizeof(int)))
       printf("Result: %d\n", result);
     else
       printf("Error in subserv\n");

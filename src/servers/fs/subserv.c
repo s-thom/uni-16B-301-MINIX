@@ -11,6 +11,7 @@
 #include <stdlib.h>
 #include "subserveList.c"
 #include <stdio.h>
+#include <unistd.h>
 
 CHANNEL *channels = NULL;
 
@@ -58,7 +59,7 @@ PUBLIC int do_subserv() {
       break;
     /* INFO */
     case 6:
-      retcode = info();
+      retcode = handle_info();
       break;
     default:
       m_out.ss_status = SS_ERROR;
@@ -66,8 +67,7 @@ PUBLIC int do_subserv() {
   }
   
   /* TODO: Send message back */
-  m_out.ss_status = retcode;
-  return OK;
+  return retcode;
 }
 
 /**
@@ -79,9 +79,10 @@ int handle_create() {
    * Create channel struct, set values
    * Send back
    */
-  CHANNEL *chan;
+  CHANNEL *chan = NULL;
   char ind;
   chan = get_channel(m_in.m3_ca1, channels);
+
   
   /* Error checking */
   /* Check channel doesn't exist
@@ -94,12 +95,13 @@ int handle_create() {
       m_out.ss_status = SS_SUCCESS;
       return OK;
     }
-  
+
     /* TODO: Set errno */
     m_out.ss_status = SS_ERROR;
     return OK;
   }
   
+  /* now we create the channel */
   chan = create_channel(m_in.ss_name, m_in.m_source, m_in.ss_int);
   channels = add_channel(chan, channels);
   
@@ -144,19 +146,22 @@ int handle_close() {
  * Handles pushing to a channel
  */
 int handle_push() {
+
   /* Push overview 
    * Check pusher owns channel
    * Free previous stored data
    * Copy data to this
    */
-  CHANNEL *chan;
-
   WPROC *temp_proc;
+  WPROC *waiting_proc;
   message *proc_reply;
   char ind;
-  chan = get_channel(m_in.m3_ca1, channels);
-  /* set the unrecieved_proc to the unrecieved List */
-  unrecieved_proc = chan->unrecieved_list;
+  CHANNEL *chan = get_channel(m_in.m3_ca1, channels);
+
+  if(loop_check(chan, "b4 psuh starts")){
+      while(1){
+      }
+    }
   
   /* Error checking */
   /* Check channel actually exists */
@@ -183,31 +188,69 @@ int handle_push() {
     chan->content_size = m_in.ss_int;
   }
   chan->content = malloc(chan->content_size);
-  sys_vircopy(m_in.m_source, D, m_in.ss_pointer, SELF, D, chan->content, chan->content_size);  
-  chan->unreceived = chan->subscribed;
+  sys_vircopy(m_in.m_source, D, m_in.ss_pointer, SELF, D, chan->content, chan->content_size);
+  printf("Content is!! %d\n", *(int*)(chan->content));  
+  /* chan->unreceived = chan->subscribed; */
   
   /* shift everything in recieved to unrecieved */
-  chan->unrecieved = list_copy(chan->unrecieved, chan->recieved);
-  chan->recieved = NULL;
-  
+  chan->unrecieved_list = list_copy(chan->unrecieved_list, chan->recieved_list);
+  chan->recieved_list = NULL;
+  /* now that received is empty point it to null */
+
+  printf("anytrhing is added rec lengh = %d\n", wproc_list_length(chan->recieved_list));
+  printf("anytrhing is added wait lengh = %d\n", wproc_list_length(chan->waiting_list));
+  printf("anytrhing is added unrec lengh = %d\n", wproc_list_length(chan->unrecieved_list));
+
+  if(loop_check(chan, "afTER push NULL")){
+      while(1){
+      }
+    }  
+
   /* Clear all waiting procs */
   while (chan->waiting_list != NULL) {
+    printf("[ss] things to send to!\n");
+
+    printf("%d\n", wproc_list_length(chan->waiting_list));
+
     waiting_proc = chan->waiting_list;
-    
-    /* Copy over */
-    copy_to_proc(waiting_proc->procnr, waiting_proc->content, waiting_proc->content_size, chan);
-    
+
+
     /* Reply to process (unblocking) */
     proc_reply = (message*) malloc(sizeof(message));
+    
+    /* Copy over */
+    proc_reply->ss_int = copy_to_proc(waiting_proc->procnr, waiting_proc->content, waiting_proc->content_size, chan);
+    
     proc_reply->ss_status = SS_SUCCESS;
     _send(waiting_proc->procnr, proc_reply);
     free(proc_reply);    
-
-    /* Move to unrecived */
-    temp_proc = chan->waiting_list->next;
-    waiting_proc->next = chan->unrecieved_list;
-    chan->recieved_list = chan->waiting_list;
-    waiting_proc = temp_proc;
+    
+   if(loop_check(chan, "b4 move to unrecived")){
+      while(1){
+      }
+    }
+    chan->waiting_list = waiting_proc->next; /* removes the the first elem off waitingList */
+    waiting_proc->next = NULL; /* unnec but testing */
+        
+    printf("b4 anytrhing is added rec lengh = %d\n", wproc_list_length(chan->recieved_list));
+    printf("b4 anytrhing is added wait lengh = %d\n", wproc_list_length(chan->waiting_list));
+    printf("b4 anytrhing is added unrec lengh = %d\n", wproc_list_length(chan->unrecieved_list));
+    
+    /* test loop */
+    /*    
+    printf("blocking loop\n"); 
+    while(1){};
+    */
+    
+    if(loop_check(chan, "mid loop push")){
+      while(1){
+      }
+    }
+    
+    if(loop_check(chan, "after push")){
+      while(1){
+      }
+    }
   }
 
   m_out.ss_status = SS_SUCCESS;
@@ -228,35 +271,59 @@ int handle_pull() {
   int sender = m_in.m_source;
   WPROC *toShift = NULL;  
 
+  printf("[ss] in pull\n");
   chan = get_channel(m_in.ss_name, channels);
   
+  if(chan->waiting_list == NULL) printf("waiting is null!!\n");
+  if(chan->unrecieved_list == NULL) printf("unrec shift is null!!\n");
+  if(chan->recieved_list == NULL) printf("rec is null!!\n");
+
   if (chan == NULL) {
     /* TODO: Set errno */
+    printf("Channel is NULL\n");
     m_out.ss_status = SS_ERROR;
     return OK;
   }
-  
+
   /* Ensure puller is subscribed */
-  if (!get_map(m_in.m_source, chan->subscribed)) {
+  if (!(get_subscriber(sender, chan->unrecieved_list) || get_subscriber(sender, chan->recieved_list) || get_subscriber(sender, chan->waiting_list))) {
     /* TODO: Set errno */
+    printf("SUBSCRIBER NOT FOUND\n");
     m_out.ss_status = SS_ERROR;
     return OK;
   }
   
   /* Subscribers should only recieve each content once */
-  if (chan->content == NULL || !get_map(m_in.m_source, chan->unreceived)) {
+  printf("place 1\n");
+  if (chan->content == NULL || get_subscriber(sender, chan->recieved_list)) {
+  printf("place 2\n");
     /* move out of reviece and into waiting */
-    toShift = get_subscriber(sender, unrecieved_list);
-    chan->unrecieved_list = wproc_seprate_out(sender, unrecieved_list);
-    toShift->next = chan->waiting_list;
-    chan->waiting_list = toShift;  
+    toShift = get_subscriber(sender, chan->recieved_list);
     
+    if(toShift == NULL){
+      toShift = get_subscriber(sender, chan->unrecieved_list);
+      chan->recieved_list = wproc_seprate_out(sender, chan->unrecieved_list);
+    }
+    else{
+      chan->recieved_list = wproc_seprate_out(sender, chan->recieved_list);        
+    }
+
+    toShift->next = chan->waiting_list;
+    chan->waiting_list = toShift;
+    if(toShift == NULL) printf("to shift is null!!\n");
+    printf("waiting list length after pull = %d\n", wproc_list_length(chan->waiting_list));  
+
     return SUSPEND;
   }
   
-  copy_to_proc(m_in.m_source, m_in.ss_pointer, m_in.ss_int, chan);
-  
+  m_out.ss_int = copy_to_proc(m_in.m_source, m_in.ss_pointer, m_in.ss_int, chan);
   m_out.ss_status = SS_SUCCESS;
+
+  if(loop_check(chan, "after pull")){
+      while(1){
+      }
+    }
+
   return OK;
 }
 
@@ -265,7 +332,7 @@ WPROC *create_wproc(int procnr, int content_size, void *content){
   
   node->procnr = procnr;
   node->content_size = content_size;
-  node->content = *content;
+  node->content = content;
   node->next = NULL;
 
   return node;
@@ -283,12 +350,12 @@ int handle_subscribe() {
    */
   CHANNEL *chan;
   int sender;
+  WPROC *new;
   /* TODO: Check for erroneous message */
   /* TODO: Write function */
 
-  temp = get_channel(m_in.ss_name, channels);
+  chan = get_channel(m_in.ss_name, channels);
   sender = m_in.m_source;
-  WPROC new;
 
   /* checks to insure the channel exists */
   if(chan != NULL){
@@ -305,8 +372,17 @@ int handle_subscribe() {
     new->next = chan->unrecieved_list;
     chan->unrecieved_list = new;
 
+    if(chan->unrecieved_list == NULL) printf("sub new is null!!\n");
+    sleep(5);
+
     m_out.ss_int = chan->min_buffer;
     m_out.ss_status = SS_SUCCESS; 
+
+    if(loop_check(chan, "after sub")){
+      while(1){
+      }
+    }    
+  
     return OK;
 
   }
@@ -343,7 +419,12 @@ int handle_unsubscribe() {
      chan->unrecieved_list = remove_from_wproc(sender, chan->unrecieved_list);
      chan->waiting_list = remove_from_wproc(sender, chan->waiting_list);
      chan->recieved_list = remove_from_wproc(sender, chan->recieved_list);
-      
+     
+     if(loop_check(chan, "after unsub")){
+      while(1){
+      }
+    }
+ 
      m_out.ss_status = SS_SUCCESS;
      return OK;
     }
@@ -391,6 +472,9 @@ int handle_info(void){
 
 int copy_to_proc(int proc, void *pointer, int size, CHANNEL *chan) {
   int copy_size;
+
+  WPROC *temp = NULL;  
+
   /* Find size to copy */
   if (chan->content_size > size) {
     copy_size = size;
@@ -399,10 +483,32 @@ int copy_to_proc(int proc, void *pointer, int size, CHANNEL *chan) {
   }
   
   /* Copy and set received */
+  printf("content b4 send %d\n", *(int*)(chan->content));
   sys_vircopy(SELF, D, chan->content, proc, D, pointer, copy_size);
+  /* move from whatever list to recieved list */
+  temp = get_subscriber(proc, chan->waiting_list);
+  if(temp == NULL){
+    temp = get_subscriber(proc, chan->unrecieved_list);
+    chan->unrecieved_list = wproc_seprate_out(proc, chan->unrecieved_list);
+  }
+  else{
+    chan->waiting_list = wproc_seprate_out(proc, chan->waiting_list);
+  }
 
-  chan->unreceived = set_map(proc, 0, chan->unreceived);
-  
-  return 1;
+  if(temp == NULL){
+    printf("copy to proc failed due to not being able to find target");
+    return 0;
+  }
+
+  temp->next = chan->recieved_list;
+  chan->recieved_list = temp;
+
+
+  if(loop_check(chan, "after copy")){
+      while(1){
+      }
+    }
+    
+  return copy_size;
 }
 

@@ -54,8 +54,6 @@ int handle_pull(void);
 int handle_subscribe(void);
 int handle_unsubscribe(void);
 int handle_info(void);
-long set_map(int index, int boolean, long current_map);
-int get_map(int index, long current_map);
 int copy_to_proc(int proc, void *pointer, int size, CHANNEL *chan);
 
 #endif

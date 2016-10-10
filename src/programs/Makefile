@@ -13,6 +13,8 @@ test: all
 	./tester
 test_block: all
 	./block_s &; ./block
+test_multiblock: all
+	./block_s &; ./block &; ./block &; ./block
 test_web: all
 	./website-list
 

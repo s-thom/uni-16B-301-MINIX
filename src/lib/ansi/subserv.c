@@ -1,5 +1,4 @@
 #include <minix/subserve.h>
-#include <stdio.h>
 
 /* a user proccess calls create_channel when it has something it wants to send to multiple other user proccess
 a channel is then created which the proccess can then input data into like a stream
@@ -13,9 +12,7 @@ int create_channel(char name[], int size){
 	m->m3_i1 = CREATECHANNEL;
 	m->m3_i2 = size;
 	strncpy(m->m3_ca1, name, 14);
-  printf("[lib] about to send\n");
 	_sendrec(FS, m);
-  printf("[lib] got reply, status: %d\n", m->m3_i1);
 	op = m->m3_i1;
 	free(m);
 

@@ -188,7 +188,7 @@ int handle_push() {
   }
   chan->content = malloc(chan->content_size);
   sys_vircopy(m_in.m_source, D, m_in.ss_pointer, SELF, D, chan->content, chan->content_size);
-  printf("Content is!! %d\n", *(int*)(chan->content));  
+  printf("Content is!! %s\n", (char*)(chan->content));  
   /* chan->unreceived = chan->subscribed; */
   
   /* shift everything in recieved to unrecieved */
@@ -306,6 +306,9 @@ int handle_pull() {
     else{
       chan->recieved_list = wproc_seprate_out(sender, chan->recieved_list);        
     }
+    
+    toShift->content = m_in.ss_pointer;
+    toShift->content_size = m_in.ss_int;
 
     toShift->next = chan->waiting_list;
     chan->waiting_list = toShift;

@@ -66,7 +66,6 @@ PUBLIC int do_subserv() {
       retcode = OK;
   }
   
-  /* TODO: Send message back */
   return retcode;
 }
 
@@ -450,7 +449,7 @@ int handle_info(void){
   int received = 0;  
   
   if(currentC == NULL){
-    printf("There are currently no channels :(");
+    printf("There are currently no channels :(\n");
   }
   else{
     printf("--------------------------------------------------------------------------------\n");
@@ -508,7 +507,6 @@ int copy_to_proc(int proc, void *pointer, int size, CHANNEL *chan) {
       while(1){
       }
     }
-    
   return copy_size;
 }
 

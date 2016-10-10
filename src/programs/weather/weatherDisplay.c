@@ -17,14 +17,14 @@ struct weather{
 
 void display(WEATHER p){
   
-  printf("---------------------------------------------\n");
-  printf("Weather at time : %s\n", asctime(&p.timeOfPush));
-  printf("it is : %s\n", p.discription);
-  printf("wind direction : %s\n", p.wind_direction);
-  printf("wind speed : %d Km/h\n", p.windspeed);
-  printf("temperature : %d°c\n", p.temp);
-  printf("humidity : %d%%\n", p.humidity);
-  printf("---------------------------------------------\n");
+  printf("+--------------------------------------------+\n");
+  printf("| Weather at time : %-.24s |\n", asctime(&p.timeOfPush));
+  printf("| it is           : %-24s |\n", p.discription);
+  printf("| wind direction  : %-24s |\n", p.wind_direction);
+  printf("| wind speed      : %19d Km/h |\n", p.windspeed);
+  printf("| temperature     : %19d°c    |\n", p.temp);
+  printf("| humidity        : %19d%%     |\n", p.humidity);
+  printf("+--------------------------------------------+\n");
 
 }
 
@@ -43,12 +43,9 @@ int main(int argc, char **argv){
   }
   
   /* update loop */
-  while(1){
-    while(!(pull("localWeather", &w, sizeof(WEATHER)))){
-      /* loop waiting 4 update */
-      sleep(waitTime);
-    }
+  while(pull("localWeather", &w, sizeof(WEATHER))){
     display(w);
   }
   
+  unsubscribe("localWeather");  
 }

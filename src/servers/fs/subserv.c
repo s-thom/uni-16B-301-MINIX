@@ -65,9 +65,7 @@ PUBLIC int do_subserv() {
       retcode = OK;
   }
   
-  /* TODO: Send message back */
-  m_out.ss_status = retcode;
-  return OK;
+  return retcode;
 }
 
 /**

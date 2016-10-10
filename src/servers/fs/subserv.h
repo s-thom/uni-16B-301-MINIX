@@ -28,7 +28,10 @@ struct channel {
   
   void *content;
   struct channel *next;
+  
   struct wproc *waiting_list;
+  struct wproc *unrecieved_list;
+  struct wproc *recieved_list;
 };
 
 /* A process that is waiting for a message */
@@ -51,8 +54,6 @@ int handle_pull(void);
 int handle_subscribe(void);
 int handle_unsubscribe(void);
 int handle_info(void);
-long set_map(int index, int boolean, long current_map);
-int get_map(int index, long current_map);
 int copy_to_proc(int proc, void *pointer, int size, CHANNEL *chan);
 
 #endif

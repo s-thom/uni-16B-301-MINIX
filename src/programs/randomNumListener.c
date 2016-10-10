@@ -6,7 +6,7 @@
 
 int main(){
 	
-	int r;
+	int r = 0;
 	int op;
 	int active = 0;
 
@@ -21,6 +21,7 @@ int main(){
 		op = pull("Rgen", &r, sizeof(int));
 		printf("Random received %d, opcode %d\n", r, op);	
 	sleep(2);
+    r = 0;
 
 	}
 }

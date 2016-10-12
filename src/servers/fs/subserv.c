@@ -20,6 +20,8 @@ PUBLIC int do_subserv() {
   char index;
   char terminated = 0;
   
+  m_out.ss_int = 0;
+  
   /* Zero the rest of the name as soon as a \0 is found */
   for (index = 0; index < 15; index++) {
     if (terminated) {
@@ -197,20 +199,17 @@ int handle_push() {
   while (chan->waiting_list != NULL) {
     waiting_proc = chan->waiting_list;
 
+    chan->waiting_list = waiting_proc->next; /* removes the the first elem off waitingList */
 
     /* Reply to process (unblocking) */
     proc_reply = (message*) malloc(sizeof(message));
-    
     /* Copy over, set ss_int field to the size copied */
-    proc_reply->ss_int = copy_to_proc(waiting_proc->procnr, waiting_proc->content, waiting_proc->content_size, chan);
-    
+    proc_reply->ss_int = copy_to_proc(waiting_proc, chan);
     /* Set mesage status, send message (unblocks reciever), free message */
     proc_reply->ss_status = SS_SUCCESS;
     _send(waiting_proc->procnr, proc_reply);
     free(proc_reply);    
     
-    chan->waiting_list = waiting_proc->next; /* removes the the first elem off waitingList */
-    waiting_proc->next = NULL; /* unnec but testing */
   }
 
   m_out.ss_status = SS_SUCCESS;
@@ -229,7 +228,8 @@ int handle_pull() {
   CHANNEL *chan;
   int copy_size;
   int sender = m_in.m_source;
-  WPROC *toShift = NULL;  
+  WPROC *toShift = NULL;
+  WPROC *proc;
 
   chan = get_channel(m_in.ss_name, channels);
 
@@ -239,10 +239,18 @@ int handle_pull() {
   }
 
   /* Ensure puller is subscribed */
-  if (!(get_subscriber(sender, chan->unrecieved_list) || get_subscriber(sender, chan->recieved_list) || get_subscriber(sender, chan->waiting_list))) {
-    m_out.ss_status = SS_ERROR;
-    return OK;
+  if (!(proc = get_subscriber(sender, chan->unrecieved_list))) {
+    if(!(proc = get_subscriber(sender, chan->recieved_list))) {
+      if(!(proc = get_subscriber(sender, chan->waiting_list))) {
+        /* Puller isn't in any of the lists */
+        m_out.ss_status = SS_ERROR;
+        return OK;
+      }
+    }
   }
+  
+  proc->content = m_in.ss_pointer;
+  proc->content_size = m_in.ss_int;
   
   /* Subscribers should only recieve each content once */
   /* If this statement is true, puller should be blocked */
@@ -257,18 +265,15 @@ int handle_pull() {
     else{
       chan->recieved_list = wproc_seprate_out(sender, chan->recieved_list);        
     }
-    
-    toShift->content = m_in.ss_pointer;
-    toShift->content_size = m_in.ss_int;
 
     toShift->next = chan->waiting_list;
-    chan->waiting_list = toShift; 
+    chan->waiting_list = toShift;
 
     return SUSPEND;
   }
   
   /* Copy data to puller, send back size copied */
-  m_out.ss_int = copy_to_proc(m_in.m_source, m_in.ss_pointer, m_in.ss_int, chan);
+  m_out.ss_int = copy_to_proc(proc, chan);
   m_out.ss_status = SS_SUCCESS;
 
   return OK;
@@ -389,38 +394,28 @@ int handle_info(void){
 }
 
 /* Helper function to do the virtual copy from subserv to another process */
-int copy_to_proc(int proc, void *pointer, int size, CHANNEL *chan) {
-  int copy_size;
-
-  WPROC *temp = NULL;  
+int copy_to_proc(WPROC *proc, CHANNEL *chan) {
+  int copy_size;  
 
   /* Find size to copy */
-  if (chan->content_size > size) {
-    copy_size = size;
+  if (chan->content_size > proc->content_size) {
+    copy_size = proc->content_size;
   } else {
     copy_size = chan->content_size;
   }
   
   /* Copy and set received */
-  sys_vircopy(SELF, D, chan->content, proc, D, pointer, copy_size);
+  sys_vircopy(SELF, D, chan->content, proc->procnr, D, proc->content, copy_size);
   /* move from whatever list to recieved list */
-  temp = get_subscriber(proc, chan->waiting_list);
-  if(temp == NULL){
-    temp = get_subscriber(proc, chan->unrecieved_list);
-    chan->unrecieved_list = wproc_seprate_out(proc, chan->unrecieved_list);
-  }
-  else{
-    chan->waiting_list = wproc_seprate_out(proc, chan->waiting_list);
-  }
-
-  if(temp == NULL){
-    printf("copy to proc failed due to not being able to find target");
-    return 0;
+  if(get_subscriber(proc->procnr, chan->unrecieved_list)){
+    chan->unrecieved_list = wproc_seprate_out(proc->procnr, chan->unrecieved_list);
+  } else {
+    chan->waiting_list = wproc_seprate_out(proc->procnr, chan->waiting_list);
   }
 
   /* Move process into the recieved list */
-  temp->next = chan->recieved_list;
-  chan->recieved_list = temp;
+  proc->next = chan->recieved_list;
+  chan->recieved_list = proc;
 
   return copy_size;
 }

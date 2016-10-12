@@ -53,7 +53,7 @@ int handle_pull(void);
 int handle_subscribe(void);
 int handle_unsubscribe(void);
 int handle_info(void);
-int copy_to_proc(int proc, void *pointer, int size, CHANNEL *chan);
+int copy_to_proc(WPROC *proc, CHANNEL *chan);
 /* subservList.c */
 CHANNEL *create_channel(char *name, char oid, int size);
 CHANNEL *add_channel(CHANNEL *new, CHANNEL *root);

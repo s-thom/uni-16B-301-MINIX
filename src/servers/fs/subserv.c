@@ -16,7 +16,6 @@
 CHANNEL *channels = NULL;
 
 PUBLIC int do_subserv() {
-  /* TODO: check message status code, act accordingly */
   int retcode;
   char index;
   char terminated = 0;
@@ -66,6 +65,10 @@ PUBLIC int do_subserv() {
       retcode = OK;
   }
   
+  /* OK sends a reply back to process
+   * SUSPEND doesn't (and blocks it until a message is sent) 
+   * Must ensure that m_out.ss_status is set
+   */
   return retcode;
 }
 
@@ -95,7 +98,6 @@ int handle_create() {
       return OK;
     }
 
-    /* TODO: Set errno */
     m_out.ss_status = SS_ERROR;
     return OK;
   }
@@ -124,17 +126,16 @@ int handle_close() {
   /* Error checking */
   /* Check channel actually exists */
   if (chan == NULL) {
-    /* TODO: Set errno */
     m_out.ss_status = SS_ERROR;
     return OK;
   }
   /* Check owner of channel */
   if (m_in.m_source != chan->oid) {
-    /* TODO: Set errno */
     m_out.ss_status = SS_ERROR;
     return OK;
   }
   
+  /* goodbye */
   channels = remove_channel(m_in.ss_name, channels);
   
   m_out.ss_status = SS_SUCCESS;
@@ -170,15 +171,19 @@ int handle_push() {
   }
   
   /* Free previous content, copy new content */
+  /* And I'm FREEEEEEEEEEEEEE */
   if (chan->content != NULL) {
+    /* FREEEEFAAAALLLINNN' */
     free(chan->content);
   }
   
+  /* Only copy over the minimum of the actual content size and what the channel owner said they'd send when creating the channel */
   if (m_in.ss_int > chan->min_buffer) {
     chan->content_size = chan->min_buffer;
   } else {
     chan->content_size = m_in.ss_int;
   }
+  /* Allocate and copy */
   chan->content = malloc(chan->content_size);
   sys_vircopy(m_in.m_source, D, m_in.ss_pointer, SELF, D, chan->content, chan->content_size);
   /* chan->unreceived = chan->subscribed; */
@@ -196,9 +201,10 @@ int handle_push() {
     /* Reply to process (unblocking) */
     proc_reply = (message*) malloc(sizeof(message));
     
-    /* Copy over */
+    /* Copy over, set ss_int field to the size copied */
     proc_reply->ss_int = copy_to_proc(waiting_proc->procnr, waiting_proc->content, waiting_proc->content_size, chan);
     
+    /* Set mesage status, send message (unblocks reciever), free message */
     proc_reply->ss_status = SS_SUCCESS;
     _send(waiting_proc->procnr, proc_reply);
     free(proc_reply);    
@@ -239,6 +245,7 @@ int handle_pull() {
   }
   
   /* Subscribers should only recieve each content once */
+  /* If this statement is true, puller should be blocked */
   if (chan->content == NULL || get_subscriber(sender, chan->recieved_list)) {
     /* move out of reviece and into waiting */
     toShift = get_subscriber(sender, chan->recieved_list);
@@ -260,21 +267,11 @@ int handle_pull() {
     return SUSPEND;
   }
   
+  /* Copy data to puller, send back size copied */
   m_out.ss_int = copy_to_proc(m_in.m_source, m_in.ss_pointer, m_in.ss_int, chan);
   m_out.ss_status = SS_SUCCESS;
 
   return OK;
-}
-
-WPROC *create_wproc(int procnr, int content_size, void *content){
-  WPROC *node = malloc(sizeof(WPROC));  
-  
-  node->procnr = procnr;
-  node->content_size = content_size;
-  node->content = content;
-  node->next = NULL;
-
-  return node;
 }
 
 
@@ -296,7 +293,6 @@ int handle_subscribe() {
 
   /* checks to insure the channel exists */
   if(chan != NULL){
-    /* m_out.ss_int = temp->min_buffer */
     /* checks to see if already subscribed */
     if(get_subscriber(sender, chan->unrecieved_list) || get_subscriber(sender, chan->waiting_list)){
       /* the channel is already subscribed */
@@ -311,6 +307,7 @@ int handle_subscribe() {
 
     sleep(5);
 
+    /* Send back the size the channel owner indicated should be allocated */
     m_out.ss_int = chan->min_buffer;
     m_out.ss_status = SS_SUCCESS; 
   
@@ -335,7 +332,6 @@ int handle_unsubscribe() {
    */
   CHANNEL *chan;
   int sender;
-  /* m_in */
 
   chan = get_channel(m_in.ss_name, channels);
   sender = m_in.m_source;  
@@ -367,6 +363,7 @@ int handle_unsubscribe() {
 
 
 int handle_info(void){
+  /* Prints info for all channels */
   CHANNEL *currentC = channels;
 
   int waiting = 0;
@@ -393,6 +390,7 @@ int handle_info(void){
   return OK;
 }
 
+/* Helper function to do the virtual copy from subserv to another process */
 int copy_to_proc(int proc, void *pointer, int size, CHANNEL *chan) {
   int copy_size;
 
@@ -422,6 +420,7 @@ int copy_to_proc(int proc, void *pointer, int size, CHANNEL *chan) {
     return 0;
   }
 
+  /* Move process into the recieved list */
   temp->next = chan->recieved_list;
   chan->recieved_list = temp;
 

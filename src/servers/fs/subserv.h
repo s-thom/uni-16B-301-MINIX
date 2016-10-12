@@ -60,15 +60,15 @@ CHANNEL *create_channel(char *name, char oid, int size);
 CHANNEL *add_channel(CHANNEL *new, CHANNEL *root);
 CHANNEL *remove_channel(char name[], CHANNEL *root);
 CHANNEL *get_channel(char name[], CHANNEL *root);
-int contains_channel(char name[], CHANNEL *root);
-WPROC *create_waiting(int proc, void *p, int size);
-WPROC *create_wproc(int procnr, int content_size, void *content);
-WPROC *get_subscriber(int procn, WPROC *root);
-WPROC *wproc_shift(int procn, WPROC *from, WPROC *to);
+int contains_channel(char name[], CHANNEL *root);=
+WPROC *create_wproc(int procnr, int content_size, void *content);;
 WPROC *remove_from_wproc(int procn, WPROC *root);
 WPROC *wproc_seprate_out(int procn, WPROC *root);
+WPROC *wproc_shift(int procn, WPROC *from, WPROC *to)
 WPROC *list_copy(WPROC *to, WPROC *from);
+WPROC *get_subscriber(int procn, WPROC *root);
 int wproc_list_length(WPROC *root);
+void *destroy_list(WPROC *root)
 
 #endif
 

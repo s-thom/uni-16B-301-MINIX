@@ -1,46 +1,42 @@
+/* Subscription server (subserv)
+ * Contains functions to make and manipulate the list structures used by subserv
+ */
 #include "subserv.h"
-#include <stdio.h>
+#include <stdio.h> /* Used during debug. Must check to ensure it doesn't get used */
 #include <stdlib.h>
 #include <string.h>
 
-/* Finds a WPROC if it's in the list. Returns NULL if not found */
-WPROC *get_subscriber(int procn, WPROC *root){
+/* Creates a new channel */
+CHANNEL* create_channel(char *name, char oid, int size) {
+  CHANNEL *nc = (CHANNEL*) malloc(sizeof(CHANNEL));
+  int i;
   
-  while(root != NULL){
-    
-    if(root->procnr == procn){
-      return root;
-    }
-    root = root->next;
+  /* Zero the entire string, including the explicit NULL terminator */
+  for (i = 0; i < 16; i++) {
+    nc->name[i] = 0;
   }
-  return NULL;
-}
-
-/* Moves a WPROC from one list to another */
-WPROC *wproc_shift(int procn, WPROC *from, WPROC *to){
-  WPROC *toMove = get_subscriber(procn, from);
-}
-
-void *destroy_list(WPROC *root){
-  WPROC *next = NULL;    
-
-  while(root != NULL){
-    next = root->next;
-    free(root);
-    root = next;       
-  }
-}
-
-/* Checks if the channel is already in the list and if it is return 1 */
-int contains_channel(char name[], CHANNEL *root){
+  strncpy(nc->name, name, 14);
+  nc->name[14] = 0; /* Just for fun */
   
-  while(root != NULL){
-    if(strncmp(name, root->name, 14) == 0){
-      return 1;
-    }
-    root = root->next;
-  }
-  return 0;
+  nc->oid = oid;
+  nc->subscribed = 0;
+  nc->unreceived = 0;
+  nc->content = NULL;
+  nc->content_size = 0;
+  nc->min_buffer = size;
+  nc->next = NULL;
+
+  nc->unrecieved_list = NULL;
+  nc->recieved_list = NULL;
+  nc->waiting_list = NULL;
+  
+  return nc;
+}
+
+/* Adds the channel to the list */
+CHANNEL *add_channel(CHANNEL *new, CHANNEL *root){
+  new->next = root;
+  return new;
 }
 
 /* Removes channel with given name from list */
@@ -89,12 +85,6 @@ CHANNEL *remove_channel(char name[], CHANNEL *root){
   return NULL;
 }
 
-/* Adds the channel to the list */
-CHANNEL *add_channel(CHANNEL *new, CHANNEL *root){
-  new->next = root;
-  return new;
-}
-
 /* Finds the channel in the list. Returns NULL if not found */
 CHANNEL *get_channel(char name[], CHANNEL *root){  
   
@@ -107,31 +97,29 @@ CHANNEL *get_channel(char name[], CHANNEL *root){
   return NULL;
 }
 
-/* Creates a new channel */
-CHANNEL* create_channel(char *name, char oid, int size) {
-  CHANNEL *nc = (CHANNEL*) malloc(sizeof(CHANNEL));
-  int i;
+/* Checks if the channel is already in the list and if it is return 1 */
+int contains_channel(char name[], CHANNEL *root){
   
-  /* Zero the entire string, including the explicit NULL terminator */
-  for (i = 0; i < 16; i++) {
-    nc->name[i] = 0;
+  while(root != NULL){
+    if(strncmp(name, root->name, 14) == 0){
+      return 1;
+    }
+    root = root->next;
   }
-  strncpy(nc->name, name, 14);
-  nc->name[14] = 0; /* Just for fun */
-  
-  nc->oid = oid;
-  nc->subscribed = 0;
-  nc->unreceived = 0;
-  nc->content = NULL;
-  nc->content_size = 0;
-  nc->min_buffer = size;
-  nc->next = NULL;
+  return 0;
+}
 
-  nc->unrecieved_list = NULL;
-  nc->recieved_list = NULL;
-  nc->waiting_list = NULL;
+/* Finds a WPROC if it's in the list. Returns NULL if not found */
+WPROC *get_subscriber(int procn, WPROC *root){
   
-  return nc;
+  while(root != NULL){
+    
+    if(root->procnr == procn){
+      return root;
+    }
+    root = root->next;
+  }
+  return NULL;
 }
 
 /* Creates a new WPROC
@@ -196,6 +184,11 @@ WPROC *wproc_seprate_out(int procn, WPROC *root){
   return root;
 }
 
+/* Moves a WPROC from one list to another */
+WPROC *wproc_shift(int procn, WPROC *from, WPROC *to){
+  WPROC *toMove = get_subscriber(procn, from);
+}
+
 /* Appends the head of `from` to the tail of `to` */
 /* after this call from must be set to NULL!! */
 WPROC *list_copy(WPROC *to, WPROC *from){
@@ -231,6 +224,18 @@ int wproc_list_length(WPROC *root){
   }
 
   return count;
+}
+
+/* The most satisfying function */
+/* Frees an entire list of WPROCs */
+void *destroy_list(WPROC *root){
+  WPROC *next = NULL;    
+
+  while(root != NULL){
+    next = root->next;
+    free(root);
+    root = next;       
+  }
 }
 
 

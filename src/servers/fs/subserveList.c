@@ -106,8 +106,8 @@ CHANNEL *get_channel(char name[], CHANNEL *root){
   return NULL;
 }
 
-struct channel* create_channel(char *name, char oid, int size) {
-  struct channel *nc = (struct channel*) malloc(sizeof(struct channel));
+CHANNEL* create_channel(char *name, char oid, int size) {
+  CHANNEL *nc = (CHANNEL*) malloc(sizeof(CHANNEL));
   int i;
   
   /* Zero the entire string, including the explicit NULL terminator */
@@ -141,6 +141,17 @@ WPROC *create_waiting(int proc, void *p, int size) {
   np->next = NULL;
   
   return np;
+}
+
+WPROC *create_wproc(int procnr, int content_size, void *content){
+  WPROC *node = malloc(sizeof(WPROC));  
+  
+  node->procnr = procnr;
+  node->content_size = content_size;
+  node->content = content;
+  node->next = NULL;
+
+  return node;
 }
 
 WPROC *remove_from_wproc(int procn, WPROC *root){

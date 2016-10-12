@@ -45,7 +45,7 @@ struct wproc {
 };
 
 /* Function prototypes */
-
+/* subserv.c */
 int do_subserv(void);
 int handle_create(void);
 int handle_close(void);
@@ -55,6 +55,20 @@ int handle_subscribe(void);
 int handle_unsubscribe(void);
 int handle_info(void);
 int copy_to_proc(int proc, void *pointer, int size, CHANNEL *chan);
+/* subservList.c */
+CHANNEL *create_channel(char *name, char oid, int size);
+CHANNEL *add_channel(CHANNEL *new, CHANNEL *root);
+CHANNEL *remove_channel(char name[], CHANNEL *root);
+CHANNEL *get_channel(char name[], CHANNEL *root);
+int contains_channel(char name[], CHANNEL *root);
+WPROC *create_waiting(int proc, void *p, int size);
+WPROC *create_wproc(int procnr, int content_size, void *content);
+WPROC *get_subscriber(int procn, WPROC *root);
+WPROC *wproc_shift(int procn, WPROC *from, WPROC *to);
+WPROC *remove_from_wproc(int procn, WPROC *root);
+WPROC *wproc_seprate_out(int procn, WPROC *root);
+WPROC *list_copy(WPROC *to, WPROC *from);
+int wproc_list_length(WPROC *root);
 
 #endif
 

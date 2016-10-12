@@ -7,6 +7,7 @@ all:
 	cc -o testing testing.c
 	cc -o weather/gen weather/weatherStation.c
 	cc -o weather/rec weather/weatherDisplay.c
+	cc -o closer closer.c
 run: all
 	./gen &; ./listener
 test: all
@@ -20,6 +21,8 @@ test_weather: all
 	./weather/gen 1 10 &; ./weather/rec
 test_web: all
 	./website-list
+test_closer: all
+	./closer
 test_itall: all
 	./website-list &; ./block_s &; ./block &; ./block &; ./block &; ./gen &; ./listener &; ./weather/gen 1 10 &; ./weather/rec
 

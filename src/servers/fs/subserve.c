@@ -5,7 +5,7 @@
 #include <minix/callnr.h>
 #include <minix/com.h>
 
-#include "subserv.h"
+#include "subserve.h"
 #include <stddef.h>
 #include <string.h>
 #include <stdlib.h>
@@ -15,7 +15,7 @@
 
 CHANNEL *channels = NULL;
 
-PUBLIC int do_subserv() {
+PUBLIC int do_subserve() {
   int retcode;
   char index;
   char terminated = 0;
@@ -404,7 +404,7 @@ int handle_info(void){
   return OK;
 }
 
-/* Helper function to do the virtual copy from subserv to another process */
+/* Helper function to do the virtual copy from subserve to another process */
 int copy_to_proc(WPROC *proc, CHANNEL *chan) {
   int copy_size;  
 

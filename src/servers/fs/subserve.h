@@ -1,8 +1,8 @@
 /* Hold the types and struct definitions used by the subscription server
  */
 
-#ifndef SUBSERV
-#define SUBSERV
+#ifndef SUBSERVE
+#define SUBSERVE
 
 #define SS_ERROR 0
 #define SS_SUCCESS 1
@@ -44,8 +44,8 @@ struct wproc {
 };
 
 /* Function prototypes */
-/* subserv.c */
-int do_subserv(void);
+/* subserve.c */
+int do_subserve(void);
 int handle_create(void);
 int handle_close(void);
 int handle_push(void);
@@ -54,7 +54,7 @@ int handle_subscribe(void);
 int handle_unsubscribe(void);
 int handle_info(void);
 int copy_to_proc(WPROC *proc, CHANNEL *chan);
-/* subservList.c */
+/* subserveList.c */
 CHANNEL *create_channel(char *name, char oid, int size);
 CHANNEL *add_channel(CHANNEL *new, CHANNEL *root);
 CHANNEL *remove_channel(char name[], CHANNEL *root);

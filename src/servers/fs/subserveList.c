@@ -1,13 +1,15 @@
-/* Subscription server (subserv)
- * Contains functions to make and manipulate the list structures used by subserv
+/* Subscription server (subserve)
+ * Contains functions to make and manipulate the list structures used by subserve
  */
-#include "subserv.h"
+
 #include <stdio.h> /* Used during debug. Must check to ensure it doesn't get used */
 #include <stdlib.h>
 #include <string.h>
 
+#include "subserve.h"
+
 /* Creates a new channel */
-CHANNEL* create_channel(char *name, char oid, int size) {
+CHANNEL *create_channel(char *name, char oid, int size) {
   CHANNEL *nc = (CHANNEL*) malloc(sizeof(CHANNEL));
   int i;
   

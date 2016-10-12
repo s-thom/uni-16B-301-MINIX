@@ -18,9 +18,7 @@ CHANNEL* create_channel(char *name, char oid, int size) {
   strncpy(nc->name, name, 14);
   nc->name[14] = 0; /* Just for fun */
   
-  nc->oid = oid;
-  nc->subscribed = 0;
-  nc->unreceived = 0;
+  nc->oid = oid; /* Owner of the channel */
   nc->content = NULL;
   nc->content_size = 0;
   nc->min_buffer = size;

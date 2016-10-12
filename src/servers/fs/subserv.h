@@ -19,10 +19,6 @@ struct channel {
   char name[15];
   char oid;
   
-  long subscribed;
-  long unreceived;
-  long waiting;
-  
   int content_size;
   int min_buffer;
   

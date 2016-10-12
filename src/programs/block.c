@@ -19,8 +19,9 @@ int main(void) {
   while (result < 5) {
     if (pull(channel_name, &result, sizeof(int)))
       printf("Result: %d\n", result);
-    else
+    else{
       printf("Error in subserv\n");
+      return;}
     /*sleep(2);*/
   }
   

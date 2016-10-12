@@ -9,14 +9,14 @@ char *channel_name = "blocker";
 int main(void) {
   int result = 0;
   int status;
-  status = create_channel(channel_name, 1);
+  status = create_channel(channel_name, sizeof(int));
   if (!status) {
     printf("[s] create channel failed\n");
     return 1;
   }
   printf("[s] channel created\n");
   
-  while (result < 7) {
+  while (result < 6) {
     if (push(channel_name, &result, sizeof(int))){
       printf("[s] Successfully pushed\n");
       result++;}

@@ -17,4 +17,6 @@ test_multiblock: all
 	./block_s &; ./block &; ./block &; ./block
 test_web: all
 	./website-list
+test_itall: all
+	./website-list &; ./block_s &; ./block &; ./block &; ./block &; ./gen &; ./listener
 

@@ -123,6 +123,7 @@ int handle_close() {
    */  
   CHANNEL *chan;
   char ind;
+  message *proc_reply;
   chan = get_channel(m_in.m3_ca1, channels);
   
   /* Error checking */
@@ -137,11 +138,21 @@ int handle_close() {
     return OK;
   }
   
+  /* Unblock all waiting processes */
+  proc_reply = (message*) malloc(sizeof(message));
+  while (chan->waiting_list != NULL) {
+    /* Nothing was copied, errors happened */
+    proc_reply->ss_int = 0;
+    proc_reply->ss_status = SS_ERROR;
+    _send(chan->waiting_list->procnr, proc_reply);
+    chan->waiting_list = chan->waiting_list->next; 
+  }
+  free(proc_reply);  
+  
   /* goodbye */
   channels = remove_channel(m_in.ss_name, channels);
   
   m_out.ss_status = SS_SUCCESS;
-  return OK;
 }
 
 /**

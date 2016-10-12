@@ -22,7 +22,7 @@ void display(WEATHER p){
   printf("| it is           : %-24s |\n", p.discription);
   printf("| wind direction  : %-24s |\n", p.wind_direction);
   printf("| wind speed      : %19d Km/h |\n", p.windspeed);
-  printf("| temperature     : %19d°c    |\n", p.temp);
+  printf("| temperature     : %20dC    |\n", p.temp);
   printf("| humidity        : %19d%%     |\n", p.humidity);
   printf("+--------------------------------------------+\n");
 

@@ -231,39 +231,4 @@ int wproc_list_length(WPROC *root){
   return count;
 }
 
-int loop_check(CHANNEL *chan, char out[]){
-  WPROC *root = NULL;  
-  
-  root = chan->unrecieved_list;
-  while(root != NULL){
-    if(root->procnr == root->next->procnr){
-      printf("infinite loop found at : %s in unrec\n", out);
-      return 1;
-    }      
-    root = root->next;  
-  }
-
-  root = chan->recieved_list;
-  while(root != NULL){
-    if(root->procnr == root->next->procnr){
-      printf("infinite loop found at : %s in rec\n", out);
-      return 1;
-    }      
-    root = root->next;  
-  }
-
-  root = chan->waiting_list;
-  while(root != NULL){
-    if(root->procnr == root->next->procnr){
-      printf("infinite loop found at : %s in wait\n", out);
-      return 1;
-    }      
-    root = root->next;  
-  }
-
-
-  
-  return 0;
-}
-
 

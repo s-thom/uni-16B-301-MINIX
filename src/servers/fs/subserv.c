@@ -305,8 +305,6 @@ int handle_subscribe() {
     new->next = chan->unrecieved_list;
     chan->unrecieved_list = new;
 
-    sleep(5);
-
     /* Send back the size the channel owner indicated should be allocated */
     m_out.ss_int = chan->min_buffer;
     m_out.ss_status = SS_SUCCESS; 

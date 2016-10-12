@@ -171,11 +171,13 @@ WPROC *wproc_seprate_out(int procn, WPROC *root){
   while(current != NULL){
     if(procn == current->procnr){
       if(prev == NULL){
+        /* Removes the current WPROC from the list */
         root = current->next;
       }
       else{
         prev->next = current->next;
       }
+      /* Note: No free() here */
     }
 
     prev = current;
@@ -218,6 +220,7 @@ WPROC *list_copy(WPROC *to, WPROC *from){
 int wproc_list_length(WPROC *root){
   int count = 0;
   
+  /* Warning: Doesn't do anything about infinite lists. As we discovered. */
   while(root != NULL){
     count++;
     root = root->next;

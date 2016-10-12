@@ -35,6 +35,9 @@ struct channel {
 };
 
 /* A process that is waiting for a message */
+/* Originally called this because it represented a [W]aiting [PROC]ess that is blocked unitl the channel's owner pushes.
+ * The name has stuck since.
+ */
 typedef struct wproc WPROC;
 struct wproc {
   int procnr;
@@ -60,15 +63,15 @@ CHANNEL *create_channel(char *name, char oid, int size);
 CHANNEL *add_channel(CHANNEL *new, CHANNEL *root);
 CHANNEL *remove_channel(char name[], CHANNEL *root);
 CHANNEL *get_channel(char name[], CHANNEL *root);
-int contains_channel(char name[], CHANNEL *root);=
-WPROC *create_wproc(int procnr, int content_size, void *content);;
+int contains_channel(char name[], CHANNEL *root);
+WPROC *create_wproc(int procnr, int content_size, void *content);
 WPROC *remove_from_wproc(int procn, WPROC *root);
 WPROC *wproc_seprate_out(int procn, WPROC *root);
-WPROC *wproc_shift(int procn, WPROC *from, WPROC *to)
+WPROC *wproc_shift(int procn, WPROC *from, WPROC *to);
 WPROC *list_copy(WPROC *to, WPROC *from);
 WPROC *get_subscriber(int procn, WPROC *root);
 int wproc_list_length(WPROC *root);
-void *destroy_list(WPROC *root)
+void *destroy_list(WPROC *root);
 
 #endif
 
